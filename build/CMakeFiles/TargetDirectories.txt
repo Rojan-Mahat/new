@@ -1,0 +1,3 @@
+/Users/rojanmahat/Desktop/new/build/CMakeFiles/new.dir
+/Users/rojanmahat/Desktop/new/build/CMakeFiles/edit_cache.dir
+/Users/rojanmahat/Desktop/new/build/CMakeFiles/rebuild_cache.dir
