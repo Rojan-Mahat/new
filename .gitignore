@@ -1,0 +1,17 @@
+#CMake generated files
+build/
+cmake-build-*/
+
+
+#Compiled executables and object files
+a.out
+*.o
+*.obj
+*.exe
+
+#macOS
+.DS_Store
+
+
+#VS Code local Settings
+.vscode/
