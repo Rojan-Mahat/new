@@ -1,42 +1,38 @@
 #include<iostream>
+#include <stdexcept>
 #include <fstream>
 #include<vector>
 #include <cctype>
-int main(){
-    std::vector<char> src;
-    std::ifstream file("test.txt");
-    char ch;
 
-    if(!file.is_open()){
-        std::cerr<<"Error opening the file \n";
+#include"Lexer.hpp"
+
+
+std::string readSourceCode(std::ifstream& file){
+    std::string src;
+    char ch;
+    if(!file.is_open())
+        throw std::runtime_error("source code could not be opened");
+    while(file.get(ch))
+       src.push_back(ch);
+    return src;
+}
+
+int main(){
+    try{
+        std::ifstream file("test.txt");
+        std::string source = readSourceCode(file);
+        Lexer lexer(source);
+        std::vector<Token> tokens = lexer.tokenize();
+
+        for (const Token& token : tokens) 
+            std::cout << token.original << " | line " << token.line << '\n';
+        
+
+    }
+    catch(const std::runtime_error& e){
+        std::cerr << "Error: " << e.what() << '\n';
         return 1;
     }
-
-    while(file.get(ch))
-        src.push_back(ch);
-
-    int m = 0;
-    while(m < src.size()){
-        if(!std::isdigit(static_cast<unsigned char>(src[m]))) {
-            m++;
-            continue;
-        }
-        int numberStart = m;
-        bool dot = false;
-        while(m < src.size() && (std::isdigit(static_cast<unsigned char>(src[m])) || src[m]=='.')){
-            if(src[m]=='.'){
-                if(dot || m+1 >= src.size())
-                    throw std::runtime_error("Lexer Error: Invalid or misplaced decimal point.");
-                if(!std::isdigit(static_cast<unsigned char>(src[m+1])) || !std::isdigit(static_cast<unsigned char>(src[m-1])))
-                   throw std::runtime_error("Lexer Error: numbers must be before and after '.'");
-                dot = true;
-            }
-            m++;
-        }
-        for(int j = numberStart ; j < m ; j++){
-            std::cout<< src[j];
-        }
-        std::cout<<" ";
-    }
+    
     return 0;
 }
