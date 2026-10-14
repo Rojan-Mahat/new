@@ -13,6 +13,7 @@ class Lexer{
 
     void scanLetter();
     void scanNumber();
+    void scanOperator();
 
 
     public:

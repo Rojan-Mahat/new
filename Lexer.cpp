@@ -18,6 +18,11 @@ std::vector<Token> Lexer::tokenize(){
         else if(std::isalpha(static_cast<unsigned char>(srcCode[cursor])) || srcCode[cursor]=='_'){
             scanLetter();
         }
+        else if(srcCode[cursor]=='<' || srcCode[cursor]=='>' ||srcCode[cursor]== ':'|| 
+            srcCode[cursor]=='+' || srcCode[cursor]=='-'|| srcCode[cursor]=='*'|| 
+            srcCode[cursor]=='/'|| srcCode[cursor]=='=')
+            scanOperator();
+
         else if(srcCode[cursor] == '\n'){
             lineNo++;
             cursor++;
@@ -48,6 +53,109 @@ void Lexer::scanNumber(){
     }
     std::string org = srcCode.substr(numberStart, cursor-numberStart);
     tokens.push_back(Token{org, lineNo, categoryType::NUMBER});
+}
+
+void Lexer::scanOperator(){
+    if(srcCode[cursor] == ':'){
+        if(cursor+1 >= srcCode.size())
+            throw std::runtime_error("Lexer Error: operator at line "+ std::to_string(lineNo)+" not defined");
+        if(srcCode[cursor+1] == '='){
+            tokens.push_back(Token{":=",lineNo,categoryType::ASSIGNMENT});
+            cursor+=2;
+        }
+        else
+            throw std::runtime_error("Lexer Error: operator at line "+ std::to_string(lineNo)+" not defined");  
+    }
+
+    else if(srcCode[cursor] == '<'){
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"<=",lineNo,categoryType::SMALLER_OR_EQUAL_TO});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{"<",lineNo,categoryType::SMALLER_THAN});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '>'){
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{">=",lineNo,categoryType::GREATER_OR_EQUAL_TO});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{">",lineNo,categoryType::GREATER_THAN});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '+'){
+       if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '+'){
+            tokens.push_back(Token{"++",lineNo,categoryType::INCREMENT});
+            cursor+=2;
+            return;
+        }
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"+=",lineNo,categoryType::ADDITION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{"+",lineNo,categoryType::PLUS});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '-'){
+       if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '-'){
+            tokens.push_back(Token{"--",lineNo,categoryType::DECREMENT});
+            cursor+=2;
+            return;
+        }
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"-=",lineNo,categoryType::SUBTRACTION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{"-",lineNo,categoryType::MINUS});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '*'){
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"*=",lineNo,categoryType::MULTIPLICATION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"*=",lineNo,categoryType::MULTIPLICATION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{"*",lineNo,categoryType::MULTIPLY});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '/'){
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"/=",lineNo,categoryType::DIVISION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        if(cursor+1 < srcCode.size() && srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"/=",lineNo,categoryType::DIVISION_ASSIGNMENT});
+            cursor+=2;
+            return;
+        }
+        tokens.push_back(Token{"/",lineNo,categoryType::DIVIDE});
+        cursor++;
+    }
+    else if(srcCode[cursor] == '='){
+        if(cursor+1 >= srcCode.size())
+            throw std::runtime_error("Lexer Error: operator at line "+ std::to_string(lineNo)+" not defined");
+        if(srcCode[cursor+1] == '='){
+            tokens.push_back(Token{"==",lineNo,categoryType::EQUAL_EQUAL});
+            cursor+=2;
+        }
+        else
+            throw std::runtime_error("Lexer Error: operator at line "+ std::to_string(lineNo)+" not defined");  
+    }
+    else 
+        throw std::runtime_error("Lexer Error: Unknown operator at line " + std::to_string(lineNo));
+    
+
+
 }
 
 void Lexer::scanLetter() {

@@ -1,4 +1,10 @@
-player123
-_health
-abc_1
-a1_b2
+let player123 := 5.0
+health := 100
+damage *= 2
+speed /= 4
+age >= 18
+score == 100
+lives+++
+health--
+heal+=10
+heal*/1900.0
