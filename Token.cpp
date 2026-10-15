@@ -2,12 +2,15 @@
 #include<string>
 std::string tokenTypeToString(categoryType type){
     switch(type){
+
         case categoryType::NUMBER:
             return "NUMBER";
         case categoryType::IDENTIFIER:
             return "IDENTIFIER";
         case categoryType::PLUS:
             return "PLUS";
+
+
         case categoryType::INCREMENT:
             return "INCREMENT";
         case categoryType::DECREMENT:
@@ -38,5 +41,39 @@ std::string tokenTypeToString(categoryType type){
             return "MULTIPLICATION_ASSIGNMENT";
         case categoryType::DIVISION_ASSIGNMENT:
             return "DIVISION_ASSIGNMENT";
+
+
+        case categoryType::LEFT_PAREN:
+            return "LEFT_PAREN";
+        case categoryType::RIGHT_PAREN:
+            return "RIGHT_PAREN";
+        case categoryType::LEFT_BRACE:
+            return "LEFT_BRACE";
+        case categoryType::RIGHT_BRACE:
+            return "RIGHT_BRACE";
+        case categoryType::LEFT_SQUARE:
+            return "LEFT_SQUARE";
+        case categoryType::RIGHT_SQUARE:
+            return "RIGHT_SQUARE";
+        case categoryType::COMMA:
+            return "COMMA";
+        case categoryType::SEMICOLON:
+            return "SEMICOLON";
+
+
+        case categoryType::MAKE:
+            return "MAKE";
+        case categoryType::WHEN:
+            return "WHEN";
+        case categoryType::OTHERWISE:
+            return "OTHERWISE";
+        case categoryType::REPEAT_UNTIL:
+            return "REPEAT_UNTIL";
+        case categoryType::TASK:
+            return "TASK";
+
+
+        case categoryType::STRING:
+            return "STRING";
     }
 }

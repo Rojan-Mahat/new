@@ -25,7 +25,7 @@ int main(){
         std::vector<Token> tokens = lexer.tokenize();
 
         for (const Token& token : tokens) 
-            std::cout << token.original << " | line " << token.line << " type " << tokenTypeToString(token.type) <<'\n';
+            std::cout << tokenTypeToString(token.type)  << " at line " << token.line << " with  " << token.original <<'\n';
     }
     catch(const std::runtime_error& e){
         std::cerr << "Error: " << e.what() << '\n';

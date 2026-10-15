@@ -14,6 +14,9 @@ class Lexer{
     void scanLetter();
     void scanNumber();
     void scanOperator();
+    void scanPunctuation();
+    void handleComments();
+    void scanString();
 
 
     public:
