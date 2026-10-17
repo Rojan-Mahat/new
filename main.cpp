@@ -6,12 +6,11 @@
 
 #include"Lexer.hpp"
 
-
 std::string readSourceCode(std::ifstream& file){
     std::string src;
     char ch;
     if(!file.is_open())
-        throw std::runtime_error("source code could not be opened");
+        throw std::runtime_error("Source code could not be opened");
     while(file.get(ch))
        src.push_back(ch);
     return src;
@@ -23,7 +22,6 @@ int main(){
         std::string source = readSourceCode(file);
         Lexer lexer(source);
         std::vector<Token> tokens = lexer.tokenize();
-
         for (const Token& token : tokens) 
             std::cout << tokenTypeToString(token.type)  << " at line " << token.line << " with  " << token.original <<'\n';
     }

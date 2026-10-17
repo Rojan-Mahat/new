@@ -2,7 +2,6 @@
 #include<string>
 std::string tokenTypeToString(categoryType type){
     switch(type){
-
         case categoryType::NUMBER:
             return "NUMBER";
         case categoryType::IDENTIFIER:

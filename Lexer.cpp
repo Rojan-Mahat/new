@@ -1,8 +1,9 @@
 
 #include"Lexer.hpp"
 #include"Token.hpp"
+#include"LexerError.hpp"
+
 #include<cctype>
-#include <stdexcept>
 #include<unordered_map>
 #include<unordered_set>
 #include <string_view>
@@ -89,7 +90,7 @@ std::vector<Token> Lexer::tokenize(){
         }
 
         else
-            throw std::runtime_error("Lexer Error: unknown operator found at "+ std::to_string(lineNo));
+            throw LexerError("Lexer Error: unknown operator found at line " , lineNo);
     }
     return std::move(tokens);
 }
@@ -101,15 +102,15 @@ void Lexer::scanNumber(){
     while(cursor < srcCode.size() && (std::isdigit(static_cast<unsigned char>(srcCode[cursor])) || srcCode[cursor]=='.')){
         if(srcCode[cursor]=='.'){
             if(dot || cursor+1 >= srcCode.size() || cursor == numberStart)
-                throw std::runtime_error("Lexer Error: Invalid or misplaced decimal point at line "+std::to_string(lineNo));
+                throw LexerError("Lexer Error: Invalid or misplaced decimal point at line ",lineNo);
             if(!std::isdigit(static_cast<unsigned char>(srcCode[cursor+1])) || !std::isdigit(static_cast<unsigned char>(srcCode[cursor-1])))
-                throw std::runtime_error("Lexer Error: numbers must be before and after '.' at line " + std::to_string(lineNo));
+                throw LexerError("Lexer Error: numbers must be before and after '.' at line " , lineNo);
             dot = true;
         }
         cursor++;
     }
     if(cursor < srcCode.size() && (std::isalpha(static_cast<unsigned char>(srcCode[cursor])) || srcCode[cursor]=='_')){
-        throw std::runtime_error("Lexer Error: seperate letters with numbers at line "+ std::to_string(lineNo));
+        throw LexerError("Lexer Error: seperate letters with numbers at line " , lineNo);
     }
     std::string org = srcCode.substr(numberStart, cursor-numberStart);
     tokens.push_back(Token{org, lineNo, categoryType::NUMBER});
@@ -130,7 +131,7 @@ void Lexer::scanOperator(){
             cursor++;
         }
         else
-            throw std::runtime_error("Lexer Error: unknown operator found at "+ std::to_string(lineNo));
+            throw LexerError("Lexer Error: unknown operator found at line ", lineNo);
     }
 }
 
@@ -170,11 +171,11 @@ void Lexer::handleComments(){
                     cursor++;
                 else{
                     std::string org = srcCode.substr(cursor,2);
-                    throw std::runtime_error("Lexer error: unknown sequence "+org+ " found at "+ std::to_string(lineNo));
+                    throw LexerError("Lexer error: unknown sequence "+ org+ " found at line ", lineNo);
                 }
             }
             else
-                throw std::runtime_error("Lexer error:  Incomplete escape sequence at line "+ std::to_string(lineNo));
+                throw LexerError("Lexer error:  Incomplete escape sequence at line ", lineNo);
         }
         else if(srcCode[cursor] == '\n')
             lineNo++;
@@ -186,6 +187,6 @@ void Lexer::handleComments(){
         cursor++;
     }
     else
-        throw std::runtime_error("Lexer error: string opened at "+ std::to_string(startingLine));
+        throw LexerError("Lexer error: string opened at line ", startingLine);
  }
 

@@ -24,7 +24,6 @@ enum categoryType{
     SMALLER_OR_EQUAL_TO,
     
 
-
     LEFT_PAREN,
     RIGHT_PAREN,
     LEFT_BRACE,
@@ -45,12 +44,16 @@ enum categoryType{
     STRING,
 };
 
-
-
 struct Token{
     std::string original;
     int line;
     categoryType type;
+
+    bool operator==(const Token& other)const = default;
 };
 
 std::string tokenTypeToString(categoryType type);
+
+
+
+
