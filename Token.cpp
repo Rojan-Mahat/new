@@ -71,8 +71,10 @@ std::string tokenTypeToString(categoryType type){
         case categoryType::TASK:
             return "TASK";
 
-
         case categoryType::STRING:
             return "STRING";
+
+        return "UNKNOWN";
     }
+    
 }

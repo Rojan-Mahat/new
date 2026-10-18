@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(new
               main.cpp
               Lexer.cpp
-              Token.cpp)
+              Token.cpp
+              Parser.cpp)
 add_executable(lexer_tests
     tests/lexer_tests.cpp
     Lexer.cpp

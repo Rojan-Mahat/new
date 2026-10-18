@@ -88,7 +88,6 @@ std::vector<Token> Lexer::tokenize(){
         else if (std::isspace(static_cast<unsigned char>(srcCode[cursor]))){
             cursor++;
         }
-
         else
             throw LexerError("Lexer Error: unknown operator found at line " , lineNo);
     }
@@ -118,21 +117,24 @@ void Lexer::scanNumber(){
 
 void Lexer::scanOperator(){
     std::string twoChar = srcCode.substr(cursor, 2);
-    auto twoCharOperator =operators.find(twoChar);
+    auto twoCharOperator = operators.find(twoChar);
+
     if(twoCharOperator !=operators.end()){
         tokens.push_back(Token{twoChar, lineNo, twoCharOperator->second});
         cursor+=2;
+        return;
     }
-    else{
-        std::string oneChar = srcCode.substr(cursor, 1);
-        auto oneCharOperator = operators.find(oneChar);
-        if(oneCharOperator != operators.end()){
-            tokens.push_back(Token{oneChar, lineNo, oneCharOperator ->second});
-            cursor++;
-        }
-        else
-            throw LexerError("Lexer Error: unknown operator found at line ", lineNo);
+
+    std::string oneChar = srcCode.substr(cursor, 1);
+    auto oneCharOperator = operators.find(oneChar);
+
+    if(oneCharOperator != operators.end()){
+        tokens.push_back(Token{oneChar, lineNo, oneCharOperator ->second});
+        cursor++;
+        return;
     }
+
+    throw LexerError("Lexer Error: unknown operator found at line ", lineNo);
 }
 
 void Lexer::scanLetter() {

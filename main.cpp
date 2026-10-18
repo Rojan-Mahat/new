@@ -2,9 +2,11 @@
 #include <stdexcept>
 #include <fstream>
 #include<vector>
-#include <cctype>
 
 #include"Lexer.hpp"
+#include"LexerError.hpp"
+#include"AST.hpp"
+#include "Parser.hpp"
 
 std::string readSourceCode(std::ifstream& file){
     std::string src;
@@ -20,15 +22,29 @@ int main(){
     try{
         std::ifstream file("test.txt");
         std::string source = readSourceCode(file);
+
         Lexer lexer(source);
         std::vector<Token> tokens = lexer.tokenize();
-        for (const Token& token : tokens) 
-            std::cout << tokenTypeToString(token.type)  << " at line " << token.line << " with  " << token.original <<'\n';
+
+        Parser parser(tokens);
+        auto root = parser.parse();
+        std::cout << "Parsing succeeded!\n";
+
+        auto* binary = dynamic_cast<BinaryNode*>(root.get());
+        if (binary && binary->op == categoryType::PLUS) 
+            std::cout << "Root operator is PLUS!\n";
+    }
+
+    catch (const LexerError& e){
+        std::cerr << e.what() << " at line " << e.getLine() << '\n';
+        return 1;
     }
     catch(const std::runtime_error& e){
         std::cerr << "Error: " << e.what() << '\n';
         return 1;
     }
+
+    
     
     return 0;
 }
