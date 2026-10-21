@@ -154,10 +154,10 @@ bool errorTester(const std::string& source,int expectedLine){
 }
 
 int main(){ 
-    /*bool validPassed = tester(validSource, validExpected);
+    bool validPassed = tester(validSource, validExpected);
     bool errorPassed = errorTester(invalidSource, 7);
     bool allPassed = validPassed && errorPassed;
     std::cout << (allPassed ? "ALL TESTS PASSED\n"
                            : "SOME TESTS FAILED\n");
-    return allPassed ? 0 : 1;*/
+    return allPassed ? 0 : 1;
 }
