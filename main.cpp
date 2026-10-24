@@ -1,12 +1,14 @@
-#include<iostream>
+#include <iostream>
 #include <stdexcept>
 #include <fstream>
-#include<vector>
+#include <vector>
 
-#include"Lexer.hpp"
-#include"LexerError.hpp"
-#include"AST.hpp"
+#include "Lexer.hpp"
+#include "LexerError.hpp"
+#include "AST.hpp"
 #include "Parser.hpp"
+#include "Evaluator.hpp"
+#include "ParserError.hpp"
 
 std::string readSourceCode(std::ifstream& file){
     std::string src;
@@ -28,14 +30,16 @@ int main(){
 
         Parser parser(tokens);
         auto root = parser.parse();
-        std::cout << "Parsing succeeded!\n";
-
-        auto* binary = dynamic_cast<BinaryNode*>(root.get());
-        if (binary && binary->op == categoryType::PLUS) 
-            std::cout << "Root operator is PLUS!\n";
+        const double result = evaluate(root.get());
+        std::cout << "Result: " << result << '\n';
     }
 
     catch (const LexerError& e){
+        std::cerr << e.what() << " at line " << e.getLine() << '\n';
+        return 1;
+    }
+
+    catch (const ParserError& e){
         std::cerr << e.what() << " at line " << e.getLine() << '\n';
         return 1;
     }
@@ -43,6 +47,7 @@ int main(){
         std::cerr << "Error: " << e.what() << '\n';
         return 1;
     }
+
 
     
     

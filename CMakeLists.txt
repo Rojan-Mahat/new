@@ -6,7 +6,8 @@ add_executable(new
               main.cpp
               Lexer.cpp
               Token.cpp
-              Parser.cpp)
+              Parser.cpp
+              Evaluator.cpp)
 add_executable(lexer_tests
     tests/lexer_tests.cpp
     Lexer.cpp

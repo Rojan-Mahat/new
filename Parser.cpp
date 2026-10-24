@@ -1,5 +1,5 @@
 #include"Parser.hpp"
-
+#include "ParserError.hpp"
 #include<stdexcept>
 
 std::unique_ptr<Expr> Parser::parsePrimary(){
@@ -12,16 +12,22 @@ std::unique_ptr<Expr> Parser::parsePrimary(){
     }
 
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::LEFT_PAREN){
-        std::string openingline = std::to_string(tokens[cursor].line);
+        int openingline = tokens[cursor].line;
         cursor++;
         auto subtree = parseExpression();
-        if(cursor >= tokens.size() || tokens[cursor].type != categoryType::RIGHT_PAREN)
-            throw std::runtime_error("Parenthesis not closed! Opened at line " + openingline);
+        if(cursor >= tokens.size())
+            throw ParserError("Parenthesis not closed! Opened at line ", openingline);
+        if(tokens[cursor].type != categoryType::RIGHT_PAREN)
+            throw ParserError(("Unexpected Token'"+tokenTypeToString(tokens[cursor].type)+"' "), tokens[cursor].line);
         cursor++;
         return subtree;
     }
 
-    throw std::runtime_error("Numbers expected!");
+    if(cursor >= tokens.size()){
+        int line = tokens.empty() ? 1 : tokens.back().line;
+        throw ParserError("Expected expression, reached end of input" , line);
+    }
+    throw ParserError(("Expected expression, found '"+tokenTypeToString(tokens[cursor].type)+"'"),tokens[cursor].line);
 }
 
 std::unique_ptr<Expr> Parser::parseTerm(){
@@ -54,6 +60,6 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 std::unique_ptr<Expr> Parser::parse(){
     auto root = parseExpression();
     if(cursor != tokens.size())
-        throw std::runtime_error("Parser Error: parser bug");
+        throw ParserError("Unexpected token '" +tokenTypeToString(tokens[cursor].type)+"' after expression",tokens[cursor].line);
     return root;
 }
