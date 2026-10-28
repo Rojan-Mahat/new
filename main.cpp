@@ -9,6 +9,7 @@
 #include "Parser.hpp"
 #include "Evaluator.hpp"
 #include "ParserError.hpp"
+#include "Environment.hpp"
 
 std::string readSourceCode(std::ifstream& file){
     std::string src;
@@ -30,7 +31,10 @@ int main(){
 
         Parser parser(tokens);
         auto root = parser.parse();
-        const double result = evaluate(root.get());
+
+        Environment env;
+        env.storeVariables("health", 100);
+        const double result = evaluate(root.get(),env);
         std::cout << "Result: " << result << '\n';
     }
 

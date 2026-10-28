@@ -3,9 +3,14 @@
 #include<stdexcept>
 
 std::unique_ptr<Expr> Parser::parsePrimary(){
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::IDENTIFIER){
+        auto ptr = std::make_unique<IdentifierNode>(tokens[cursor].original);
+        cursor++;
+        return ptr;
+    }
+    
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::NUMBER){
-        Token currentToken = tokens[cursor];
-        double num = std::stod(currentToken.original);
+        double num = std::stod(tokens[cursor].original);
         auto ptr = std::make_unique<NumberNode>(num);
         cursor++;
         return ptr;

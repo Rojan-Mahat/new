@@ -7,7 +7,8 @@ add_executable(new
               Lexer.cpp
               Token.cpp
               Parser.cpp
-              Evaluator.cpp)
+              Evaluator.cpp
+              Environment.cpp)
 add_executable(lexer_tests
     tests/lexer_tests.cpp
     Lexer.cpp
@@ -26,5 +27,14 @@ add_executable(parser_tests
 )
 
 target_include_directories(parser_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_executable(environment_tests
+    tests/environment_test.cpp
+    Environment.cpp
+)
+
+target_include_directories(environment_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

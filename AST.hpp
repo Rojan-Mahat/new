@@ -26,3 +26,11 @@ struct BinaryNode : Expr{
         right(std::move(p2))
         {}
 };
+
+
+struct IdentifierNode : Expr{
+    std::string name;
+    IdentifierNode(std::string nameFromToken)
+        :name(std::move(nameFromToken))
+    {}
+};
