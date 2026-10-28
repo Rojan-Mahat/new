@@ -34,3 +34,13 @@ struct IdentifierNode : Expr{
         :name(std::move(nameFromToken))
     {}
 };
+
+struct AssignmentNode : Expr{
+    std::string name;
+    std::unique_ptr<Expr> right;
+
+    AssignmentNode(std::string nameFromToken, std::unique_ptr<Expr> ptr)
+        :name(std::move(nameFromToken)),
+        right(std::move(ptr))
+        {}
+};

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <vector>
+#include <memory>
 
 #include "Lexer.hpp"
 #include "LexerError.hpp"
@@ -11,6 +12,7 @@
 #include "ParserError.hpp"
 #include "Environment.hpp"
 
+std::vector<std::unique_ptr<Expr>> parsed_AST;
 std::string readSourceCode(std::ifstream& file){
     std::string src;
     char ch;
@@ -30,12 +32,13 @@ int main(){
         std::vector<Token> tokens = lexer.tokenize();
 
         Parser parser(tokens);
-        auto root = parser.parse();
+        parser.parseProgram(parsed_AST);
 
         Environment env;
-        env.storeVariables("health", 100);
-        const double result = evaluate(root.get(),env);
-        std::cout << "Result: " << result << '\n';
+        for(const std::unique_ptr<Expr>& root : parsed_AST){
+            const double result = evaluate(root.get(),env);
+            std::cout << "Result: " << result << '\n';
+        }
     }
 
     catch (const LexerError& e){

@@ -13,6 +13,9 @@ struct Parser{
         std::unique_ptr<Expr> parsePrimary();
         std::unique_ptr<Expr> parseTerm();
         std::unique_ptr<Expr> parseExpression();
+        std::unique_ptr<Expr> parseAssignment();
+        
+       
     
 
     public:
@@ -21,6 +24,7 @@ struct Parser{
         cursor(0)
         {}
     
+    void parseProgram(std::vector<std::unique_ptr<Expr>>& vec);
     std::unique_ptr<Expr> parse();
     
 };

@@ -65,9 +65,11 @@ std::vector<Token> Lexer::tokenize(){
         if(std::isdigit(static_cast<unsigned char>(srcCode[cursor])) || srcCode[cursor] == '.') {
             scanNumber();
         }
+
         else if(std::isalpha(static_cast<unsigned char>(srcCode[cursor])) || srcCode[cursor]=='_'){
             scanLetter();
         }
+
         else if(operatorStarts.find(srcCode[cursor]) != std::string_view::npos)
             scanOperator();
         
@@ -191,4 +193,5 @@ void Lexer::handleComments(){
     else
         throw LexerError("Lexer error: string opened at line ", startingLine);
  }
+
 

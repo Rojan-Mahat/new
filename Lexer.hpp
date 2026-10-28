@@ -15,6 +15,7 @@ class Lexer{
     void scanPunctuation();
     void handleComments();
     void scanString();
+    void scanSemicolon();
 
     public:
     Lexer(const std::string& src);

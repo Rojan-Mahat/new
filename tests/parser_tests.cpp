@@ -136,11 +136,11 @@ int getErrorResult(std::vector<std::string> invalidSources , std::vector<std::st
 
 int main(){
     std::vector<std::string> sources = {
-        "3.75 + 2.5 * 4",
-        "0.125 * 8.5",
-        "(12.5 - 3.25) / 2.5",
-        "1.0 + 2.00 * 3.500",
-        "((0.5 + 1.25) * (4.75 - 2.5)) / 3.0"
+        "3.75 + 2.5 * 4;",
+        "0.125 * 8.5;",
+        "(12.5 - 3.25) / 2.5;",
+        "1.0 + 2.00 * 3.500;",
+        "((0.5 + 1.25) * (4.75 - 2.5)) / 3.0;"
     };
     std::vector<std::vector<std::string>> expectations = {
         {"PLUS", "3.75", "MULTIPLY", "2.5", "4"},
@@ -152,7 +152,7 @@ int main(){
     };
 
     std::vector<std::string> invalidSources = {
-        "2 + * 3",
+        "2 + * 3;",
         "3+",
         "(2 + 3",
         "(2--3)",
@@ -168,8 +168,8 @@ int main(){
         "Expected expression, reached end of input",
         "Parenthesis not closed",
         "Unexpected Token'DECREMENT'",
-        "Unexpected token 'INCREMENT' after expression",
-        "Unexpected token 'NUMBER' after expression",
+        "Expected semicolon after expression",
+        "Expected semicolon after expression",
         "Parenthesis not closed",
         "Expected expression, found 'DIVIDE'",
         "Expected expression, found 'RIGHT_PAREN'",

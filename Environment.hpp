@@ -8,5 +8,5 @@ class Environment{
     public:
     void storeVariables(std::string, double data);
     double getVariables(std::string);
-
+    bool ifExists(std::string);
 };

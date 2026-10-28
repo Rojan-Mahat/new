@@ -2,13 +2,29 @@
 #include "ParserError.hpp"
 #include<stdexcept>
 
+
+std::unique_ptr<Expr> Parser::parseAssignment(){
+    auto left = parseExpression();
+    if(cursor >= tokens.size() || tokens[cursor].type != categoryType::ASSIGNMENT)
+        return left;
+
+    auto IN = dynamic_cast<const IdentifierNode*>(left.get());
+    if(IN == nullptr)
+        throw ParserError("Must have Identifier", tokens[cursor].line);
+
+    cursor++;
+    auto right = parseExpression();
+    auto ptr = std::make_unique<AssignmentNode>(IN->name,std::move(right));
+    return ptr;
+}
+
 std::unique_ptr<Expr> Parser::parsePrimary(){
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::IDENTIFIER){
         auto ptr = std::make_unique<IdentifierNode>(tokens[cursor].original);
         cursor++;
         return ptr;
     }
-    
+
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::NUMBER){
         double num = std::stod(tokens[cursor].original);
         auto ptr = std::make_unique<NumberNode>(num);
@@ -63,8 +79,21 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 }
 
 std::unique_ptr<Expr> Parser::parse(){
-    auto root = parseExpression();
-    if(cursor != tokens.size())
-        throw ParserError("Unexpected token '" +tokenTypeToString(tokens[cursor].type)+"' after expression",tokens[cursor].line);
+    auto root = parseAssignment();
+    int line = tokens.empty() ? 1 : tokens.back().line;
+    if(cursor >= tokens.size())
+        throw ParserError("Expected semicolon after expression", line);
+    if(tokens[cursor].type != categoryType::SEMICOLON)
+        throw ParserError("Expected semicolon after expression", tokens[cursor].line);
+
+    while(cursor < tokens.size() && tokens[cursor].type == categoryType::SEMICOLON)
+        cursor++;
     return root;
+}
+
+void Parser::parseProgram(std::vector<std::unique_ptr<Expr>>& vec){
+    while(cursor < tokens.size()){
+        auto ptr = parse();
+        vec.push_back(std::move(ptr));
+    }
 }
