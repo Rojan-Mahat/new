@@ -13,16 +13,18 @@
 #include <stdexcept>
 
 std::vector<std::string> validSources = {
-    "a := 10;",
-    "a := 10 + 5 * 2;",
-    "a := 10; b := a * 2;",
-    "a := 10; a := 50;",
-    "a := 10; b := a * 2; a := 50; c := a + b;",
-    "x := (10 + 5) * 2;",
-    "a := 100; b := a / 4; c := b - 5;",
-    "a := 10;;; b := 20;;",
-    "x := 3.5; y := x * 2;",
-    "a := 10; b := a + a; c := b * a;"
+    "make a := 10;",
+    "make a := 10 + 5 * 2;",
+    "make a := 10; make b := a * 2;",
+    "make a := 10; a := 50;",
+    "make a := 10; make b := a * 2; a := 50; make c := a + b;",
+    "make x := (10 + 5) * 2;",
+    "make a := 100; make b := a / 4; make c := b - 5;",
+    "make a := 10;;; make b := 20;;",
+    "make x := 3.5; make y := x * 2;",
+    "make a := 10; make b := a + a; make c := b * a;",
+    "make a := 5; a := a + 10; a := a * 2;",
+    "make a := 10; make b := a + 5; b := b * 2;"
 };
 
 std::vector<std::vector<double>> validExpectations = {
@@ -35,7 +37,9 @@ std::vector<std::vector<double>> validExpectations = {
     {100, 25, 20},
     {10, 20},
     {3.5, 7},
-    {10, 20, 200}
+    {10, 20, 200},
+    {5, 15, 30},
+    {10, 15, 30}
 };
 
 bool validTester(){
@@ -62,21 +66,28 @@ bool validTester(){
 
 
 std::vector<std::string> invalidSources = {
-    "a := 10",
-    "5 := 10;",
-    "a := missing + 5;",
-    "a := 10 / 0;",
-    "a := 10; b := unknown * 2;",
-    "a := 10 + * 5;",
-    "a := 10; b := 20",
-    "a := (10 + 5;",
-    "a := 10; b := 20; c := b / (a - 10);",
-    "a := 10; b := 20 c := 30;"
+    "make a := 10",
+    "make 5 := 10;",
+    "make a := missing + 5;",
+    "make a := 10 / 0;",
+    "make a := 10; make b := unknown * 2;",
+    "make a := 10 + * 5;",
+    "make a := 10; make b := 20",
+    "make a := (10 + 5;",
+    "make a := 10; make b := 20; make c := b / (a - 10);",
+    "make a := 10; make b := 20 make c := 30;",
+    "a := 10;",
+    "make a := 10; make a := 20;",
+    "make a :=;",
+    "make a 10;",
+    "make := 10;",
+    "make a;",
+    "make a := 10; b := a + 5;"
 };
 
 std::vector<std::string> invalidExpectations = {
     "Expected semicolon after expression",
-    "Must have Identifier",
+    "Expected identifier",
     "Identifier not accessible",
     "Division by zero is undefined",
     "Identifier not accessible",
@@ -84,7 +95,14 @@ std::vector<std::string> invalidExpectations = {
     "Expected semicolon after expression",
     "Unexpected Token'SEMICOLON'",
     "Division by zero is undefined",
-    "Expected semicolon after expression"
+    "Expected semicolon after expression",
+    "Identifier not declared",
+    "Identifier already declared",
+    "Expected expression, found 'SEMICOLON'",
+    "Expected :=",
+    "Expected identifier",
+    "Expected :=",
+    "Identifier not declared"
 };
 
 std::vector<bool> expectsParserError = {
@@ -97,7 +115,14 @@ std::vector<bool> expectsParserError = {
     true,
     true,
     false,
-    true
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false
 };
 
 bool invalidTester(){

@@ -9,4 +9,5 @@ class Environment{
     void storeVariables(std::string, double data);
     double getVariables(std::string);
     bool ifExists(std::string);
+    void declareVariables(std::string, double data);
 };

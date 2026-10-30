@@ -6,10 +6,17 @@ double evaluate(const Expr* node, Environment& env){
     const BinaryNode* BN = dynamic_cast<const BinaryNode*> (node);
     const IdentifierNode* IN = dynamic_cast<const IdentifierNode*> (node);
     const AssignmentNode* AN = dynamic_cast<const AssignmentNode*> (node);
+    const DeclarationNode* DN = dynamic_cast<const DeclarationNode*> (node);
+
+    if(DN != nullptr){
+        const Expr* right_node = DN->initializer.get();
+        double rightValue = evaluate(right_node, env);
+        env.declareVariables(DN->name, rightValue);
+        return rightValue;
+    }
+
     if(AN != nullptr){
         const Expr* right_node = AN->right.get();
-        //if(!env.ifExists(name))
-            //throw std::runtime_error("identifer not declared yet");
         double rightValue = evaluate(right_node, env);
         env.storeVariables(AN->name,rightValue);
         return rightValue;

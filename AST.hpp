@@ -44,3 +44,13 @@ struct AssignmentNode : Expr{
         right(std::move(ptr))
         {}
 };
+
+struct DeclarationNode : Expr {
+    std::string name;
+    std::unique_ptr<Expr> initializer;
+
+    DeclarationNode(std::string nameFromToken, std::unique_ptr<Expr> ptr)
+        :name(std::move(nameFromToken)),
+        initializer(std::move(ptr))
+        {}
+};

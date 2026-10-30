@@ -14,6 +14,8 @@ struct Parser{
         std::unique_ptr<Expr> parseTerm();
         std::unique_ptr<Expr> parseExpression();
         std::unique_ptr<Expr> parseAssignment();
+        std::unique_ptr<Expr> parseDeclaration();
+        std::unique_ptr<Expr> parseStatement();
         
        
     
