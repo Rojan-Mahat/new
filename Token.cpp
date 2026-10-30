@@ -60,12 +60,14 @@ std::string tokenTypeToString(categoryType type){
             return "SEMICOLON";
 
 
-        case categoryType::MAKE:
-            return "MAKE";
-        case categoryType::WHEN:
-            return "WHEN";
-        case categoryType::OTHERWISE:
-            return "OTHERWISE";
+        case categoryType::MANAM:
+            return "MANAM";
+        case categoryType::YEDI:
+            return "YEDI";
+        case categoryType::NAVAYE:
+            return "NAVAYE";
+        case categoryType::NATRA:
+            return "NATRA";
         case categoryType::REPEAT_UNTIL:
             return "REPEAT_UNTIL";
         case categoryType::TASK:

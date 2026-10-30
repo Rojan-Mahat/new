@@ -34,9 +34,10 @@ enum categoryType{
     SEMICOLON,
 
 
-    MAKE,
-    WHEN,
-    OTHERWISE,
+    MANAM,
+    YEDI,
+    NAVAYE,
+    NATRA,
     REPEAT_UNTIL,
     TASK,
 

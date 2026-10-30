@@ -7,55 +7,56 @@
 
 std::string validSource =
     "~ LEXER STRESS TEST\n"
-    "make player_123 := 99.75\n"
-    "make _health := 100\n"
-    "make message := \"Hello \\\"World\\\"!\"\n"
-    "make path := \"C:\\\\Games\\\\new\"\n"
-    "make multiline := \"First line\n"
+    "manam player_123 := 99.75\n"
+    "manam _health := 100\n"
+    "manam message := \"Hello \\\"World\\\"!\"\n"
+    "manam path := \"C:\\\\Games\\\\new\"\n"
+    "manam multiline := \"First line\n"
     "Second ~ not a comment\n"
     "Third line\"\n"
-    "when (_health >= 50) {\n"
+    "yedi (_health >= 50) {\n"
     "    player_123 += 10\n"
     "    _health--\n"
     "    player_123 *= 2.5\n"
     "}\n"
-    "otherwise {\n"
+    "natra {\n"
     "    task calculate(a, b) {\n"
-    "        make result := a + b / 2\n"
+    "        manam result := a + b / 2\n"
     "    }\n"
     "}\n"
     "repeat_until (player_123 == 0)\n"
     "maker+++_abc\n"
-    "[make, when, task];\n"
+    "[manam, yedi, natra, task];\n"
     "~ END";
 
+
 std::vector<Token> validExpected = {
-    {"make", 2, categoryType::MAKE},
+    {"manam", 2, categoryType::MANAM},
     {"player_123", 2, categoryType::IDENTIFIER},
     {":=", 2, categoryType::ASSIGNMENT},
     {"99.75", 2, categoryType::NUMBER},
 
-    {"make", 3, categoryType::MAKE},
+    {"manam", 3, categoryType::MANAM},
     {"_health", 3, categoryType::IDENTIFIER},
     {":=", 3, categoryType::ASSIGNMENT},
     {"100", 3, categoryType::NUMBER},
 
-    {"make", 4, categoryType::MAKE},
+    {"manam", 4, categoryType::MANAM},
     {"message", 4, categoryType::IDENTIFIER},
     {":=", 4, categoryType::ASSIGNMENT},
     {"Hello \\\"World\\\"!", 4, categoryType::STRING},
 
-    {"make", 5, categoryType::MAKE},
+    {"manam", 5, categoryType::MANAM},
     {"path", 5, categoryType::IDENTIFIER},
     {":=", 5, categoryType::ASSIGNMENT},
     {"C:\\\\Games\\\\new", 5, categoryType::STRING},
 
-    {"make", 6, categoryType::MAKE},
+    {"manam", 6, categoryType::MANAM},
     {"multiline", 6, categoryType::IDENTIFIER},
     {":=", 6, categoryType::ASSIGNMENT},
     {"First line\nSecond ~ not a comment\nThird line", 6, categoryType::STRING},
 
-    {"when", 9, categoryType::WHEN},
+    {"yedi", 9, categoryType::YEDI},
     {"(", 9, categoryType::LEFT_PAREN},
     {"_health", 9, categoryType::IDENTIFIER},
     {">=", 9, categoryType::GREATER_OR_EQUAL_TO},
@@ -76,7 +77,7 @@ std::vector<Token> validExpected = {
 
     {"}", 13, categoryType::RIGHT_BRACE},
 
-    {"otherwise", 14, categoryType::OTHERWISE},
+    {"natra", 14, categoryType::NATRA},
     {"{", 14, categoryType::LEFT_BRACE},
 
     {"task", 15, categoryType::TASK},
@@ -88,7 +89,7 @@ std::vector<Token> validExpected = {
     {")", 15, categoryType::RIGHT_PAREN},
     {"{", 15, categoryType::LEFT_BRACE},
 
-    {"make", 16, categoryType::MAKE},
+    {"manam", 16, categoryType::MANAM},
     {"result", 16, categoryType::IDENTIFIER},
     {":=", 16, categoryType::ASSIGNMENT},
     {"a", 16, categoryType::IDENTIFIER},
@@ -113,25 +114,26 @@ std::vector<Token> validExpected = {
     {"_abc", 20, categoryType::IDENTIFIER},
 
     {"[", 21, categoryType::LEFT_SQUARE},
-    {"make", 21, categoryType::MAKE},
+    {"manam", 21, categoryType::MANAM},
     {",", 21, categoryType::COMMA},
-    {"when", 21, categoryType::WHEN},
+    {"yedi", 21, categoryType::YEDI},
+    {",", 21, categoryType::COMMA},
+    {"natra", 21, categoryType::NATRA},
     {",", 21, categoryType::COMMA},
     {"task", 21, categoryType::TASK},
     {"]", 21, categoryType::RIGHT_SQUARE},
     {";", 21, categoryType::SEMICOLON}
 };
 
-
 std::string invalidSource =
-    "make health := 100\n"
-    "make message := \"Safe ~ text\"\n"
+    "manam health := 100\n"
+    "manam message := \"Safe ~ text\"\n"
     "~ An ignored comment\n"
-    "when (health >= 50) {\n"
-    "    make value := 12.5\n"
+    "yedi (health >= 50) {\n"
+    "    manam value := 12.5\n"
     "    health += 10\n"
-    "    make broken := 123_abc\n"
-    "    make neverReached := 500\n"
+    "    manam broken := 123_abc\n"
+    "    manam neverReached := 500\n"
     "}\n";
 int expectedLine = 7;
 

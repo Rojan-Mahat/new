@@ -3,6 +3,7 @@
 #include<memory>
 #include<utility>
 #include "Token.hpp"
+#include<vector>
 
 struct Expr{
     virtual ~Expr() = default;
@@ -53,4 +54,14 @@ struct DeclarationNode : Expr {
         :name(std::move(nameFromToken)),
         initializer(std::move(ptr))
         {}
+};
+
+struct YediNode : Expr{
+    std::unique_ptr<Expr> conditional_statement;
+    std::vector<std::unique_ptr<Expr>> body_statements;
+
+    YediNode(std::unique_ptr<Expr> condition,std::vector<std::unique_ptr<Expr>> body)
+        :conditional_statement(std::move(condition)),
+        body_statements(std::move(body))
+    {}
 };

@@ -2,6 +2,9 @@
 #include "ParserError.hpp"
 #include<stdexcept>
 
+bool Parser::isBlockStatement(categoryType type){
+    return type == categoryType::YEDI;
+}
 
 void Parser::parseProgram(std::vector<std::unique_ptr<Expr>>& vec){
     while(cursor < tokens.size()){
@@ -11,7 +14,10 @@ void Parser::parseProgram(std::vector<std::unique_ptr<Expr>>& vec){
 }
 
 std::unique_ptr<Expr> Parser::parse(){
+    bool isBlock = cursor < tokens.size() && isBlockStatement(tokens[cursor].type);
     auto root = parseStatement();
+    if(isBlock)
+        return root;
     int line = tokens.empty() ? 1 : tokens.back().line;
     if(cursor >= tokens.size())
         throw ParserError("Expected semicolon after expression", line);
@@ -40,7 +46,7 @@ std::unique_ptr<Expr> Parser::parsePrimary(){
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::LEFT_PAREN){
         int openingline = tokens[cursor].line;
         cursor++;
-        auto subtree = parseExpression();
+        auto subtree = parseComparison();
         if(cursor >= tokens.size())
             throw ParserError("Parenthesis not closed! Opened at line ", openingline);
         if(tokens[cursor].type != categoryType::RIGHT_PAREN)
@@ -84,10 +90,38 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 }
 
 std::unique_ptr<Expr> Parser::parseStatement(){
-    if(cursor < tokens.size() && tokens[cursor].type == categoryType::MAKE)
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::YEDI)
+        return parseYedi();
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::MANAM)
         return parseDeclaration();
     return parseAssignment();
 }
+
+
+std::unique_ptr<Expr> Parser::parseYedi(){
+    cursor++;
+    auto conditions = parseComparison();
+    if(cursor >= tokens.size())
+        throw ParserError("Error: Statement closed unexpectedly, Expected {", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_BRACE)
+        throw ParserError("Error: Unexpected statement, Expected {", tokens[cursor].line);
+
+    cursor++;
+    std::vector<std::unique_ptr<Expr>> body;
+    while(cursor < tokens.size() && tokens[cursor].type != categoryType::RIGHT_BRACE){
+        body.push_back(parse());
+    }
+
+    if(cursor >= tokens.size())
+        throw ParserError("Error: Statement closed unexpectedly, Expected }", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::RIGHT_BRACE)
+        throw ParserError("Error: Unexpected statement, Expected }", tokens[cursor].line);
+
+    cursor++;
+    auto ptr = std::make_unique<YediNode>(std::move(conditions), std::move(body));
+    return ptr;
+}
+
 
 std::unique_ptr<Expr> Parser::parseDeclaration(){
     cursor++;
@@ -105,13 +139,13 @@ std::unique_ptr<Expr> Parser::parseDeclaration(){
         throw ParserError("Expected :=", tokens[cursor].line);
 
     cursor++;
-    auto right = parseExpression();
+    auto right = parseComparison();
     auto ptr = std::make_unique<DeclarationNode>(name,std::move(right));
     return ptr;
 }
 
 std::unique_ptr<Expr> Parser::parseAssignment(){
-    auto left = parseExpression();
+    auto left = parseComparison();
     if(cursor >= tokens.size() || tokens[cursor].type != categoryType::ASSIGNMENT)
         return left;
 
@@ -120,11 +154,25 @@ std::unique_ptr<Expr> Parser::parseAssignment(){
         throw ParserError("Must have Identifier", tokens[cursor].line);
 
     cursor++;
-    auto right = parseExpression();
+    auto right = parseComparison();
     auto ptr = std::make_unique<AssignmentNode>(IN->name,std::move(right));
     return ptr;
 }
 
+std::unique_ptr<Expr> Parser::parseComparison(){
+    auto left = parseExpression();
+    while(cursor < tokens.size() && (tokens[cursor].type == categoryType::EQUAL_EQUAL
+    || tokens[cursor].type == categoryType::GREATER_THAN
+    || tokens[cursor].type == categoryType::GREATER_OR_EQUAL_TO
+    || tokens[cursor].type == categoryType::SMALLER_THAN
+    || tokens[cursor].type == categoryType::SMALLER_OR_EQUAL_TO)){
+        auto op = tokens[cursor].type;
+        cursor++;
+        auto right = parseExpression();
+        left = std::make_unique<BinaryNode>(op,std::move(left),std::move(right));
+    }
+    return left;
+}
 
 
 

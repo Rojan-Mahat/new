@@ -13,18 +13,18 @@
 #include <stdexcept>
 
 std::vector<std::string> validSources = {
-    "make a := 10;",
-    "make a := 10 + 5 * 2;",
-    "make a := 10; make b := a * 2;",
-    "make a := 10; a := 50;",
-    "make a := 10; make b := a * 2; a := 50; make c := a + b;",
-    "make x := (10 + 5) * 2;",
-    "make a := 100; make b := a / 4; make c := b - 5;",
-    "make a := 10;;; make b := 20;;",
-    "make x := 3.5; make y := x * 2;",
-    "make a := 10; make b := a + a; make c := b * a;",
-    "make a := 5; a := a + 10; a := a * 2;",
-    "make a := 10; make b := a + 5; b := b * 2;"
+    "manam a := 10;",
+    "manam a := 10 + 5 * 2;",
+    "manam a := 10; manam b := a * 2;",
+    "manam a := 10; a := 50;",
+    "manam a := 10; manam b := a * 2; a := 50; manam c := a + b;",
+    "manam x := (10 + 5) * 2;",
+    "manam a := 100; manam b := a / 4; manam c := b - 5;",
+    "manam a := 10;;; manam b := 20;;",
+    "manam x := 3.5; manam y := x * 2;",
+    "manam a := 10; manam b := a + a; manam c := b * a;",
+    "manam a := 5; a := a + 10; a := a * 2;",
+    "manam a := 10; manam b := a + 5; b := b * 2;"
 };
 
 std::vector<std::vector<double>> validExpectations = {
@@ -66,23 +66,23 @@ bool validTester(){
 
 
 std::vector<std::string> invalidSources = {
-    "make a := 10",
-    "make 5 := 10;",
-    "make a := missing + 5;",
-    "make a := 10 / 0;",
-    "make a := 10; make b := unknown * 2;",
-    "make a := 10 + * 5;",
-    "make a := 10; make b := 20",
-    "make a := (10 + 5;",
-    "make a := 10; make b := 20; make c := b / (a - 10);",
-    "make a := 10; make b := 20 make c := 30;",
+    "manam a := 10",
+    "manam 5 := 10;",
+    "manam a := missing + 5;",
+    "manam a := 10 / 0;",
+    "manam a:= 10; manam b := unknown * 2;",
+    "manam a := 10 + * 5;",
+    "manam a := 10; manam b := 20",
+    "manam a := (10 + 5;",
+    "manam a := 10; manam b := 20; manam c := b / (a - 10);",
+    "manam a := 10; manam b := 20 manam c := 30;",
     "a := 10;",
-    "make a := 10; make a := 20;",
-    "make a :=;",
-    "make a 10;",
-    "make := 10;",
-    "make a;",
-    "make a := 10; b := a + 5;"
+    "manam a := 10; manam a := 20;",
+    "manam a :=;",
+    "manam a 10;",
+    "manam := 10;",
+    "manam a;",
+    "manam a := 10; b := a + 5;"
 };
 
 std::vector<std::string> invalidExpectations = {

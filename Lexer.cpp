@@ -12,9 +12,10 @@ namespace{
     constexpr std::string_view operatorStarts = "+-*/<>=:";
 
     const std::unordered_map<std::string,categoryType> keywords= {
-        {"make",categoryType::MAKE},
-        {"when", categoryType::WHEN},
-        {"otherwise", categoryType::OTHERWISE},
+        {"manam",categoryType::MANAM},
+        {"yedi", categoryType::YEDI},
+        {"natra", categoryType::NATRA},
+        {"navaye", categoryType::NAVAYE},
         {"repeat_until", categoryType::REPEAT_UNTIL},
         {"task", categoryType::TASK},
     };

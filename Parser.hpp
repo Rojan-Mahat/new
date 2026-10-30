@@ -16,7 +16,10 @@ struct Parser{
         std::unique_ptr<Expr> parseAssignment();
         std::unique_ptr<Expr> parseDeclaration();
         std::unique_ptr<Expr> parseStatement();
-        
+        std::unique_ptr<Expr> parseComparison();
+        std::unique_ptr<Expr> parseYedi();
+
+        bool isBlockStatement(categoryType type);
        
     
 

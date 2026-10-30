@@ -1,1 +1,6 @@
-make a := a;
+manam a := 10;
+yedi a > 100 {
+    a := 999;
+}
+
+a;
