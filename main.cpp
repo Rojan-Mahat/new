@@ -11,6 +11,7 @@
 #include "Evaluator.hpp"
 #include "ParserError.hpp"
 #include "Environment.hpp"
+#include "Value.hpp"
 
 std::vector<std::unique_ptr<Expr>> parsed_AST;
 std::string readSourceCode(std::ifstream& file){
@@ -35,10 +36,8 @@ int main(){
         parser.parseProgram(parsed_AST);
 
         Environment env;
-        for(const std::unique_ptr<Expr>& root : parsed_AST){
-            const double result = evaluate(root.get(),env);
-            std::cout << "Result: " << result << '\n';
-        }
+        for(const std::unique_ptr<Expr>& root : parsed_AST)
+            const Value result = evaluate(root.get(),env);
     }
 
     catch (const LexerError& e){

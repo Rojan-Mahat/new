@@ -4,7 +4,7 @@
 int main(){
     Environment env;
     env.declareVariables("a", 5.0);
-    env.declareVariables("b", 50);
+    env.declareVariables("b", 50.0);
     try{
         env.getVariables("b");
     }

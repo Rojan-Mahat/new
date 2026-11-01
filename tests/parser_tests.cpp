@@ -1,7 +1,7 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ParserError.hpp"
-
+#include "Value.hpp"
 #include<iostream>
 #include <sstream>
 
@@ -9,8 +9,8 @@ const BinaryNode* asBinary(const Expr* root) {
     return dynamic_cast<const BinaryNode*>(root);
 }
 
-const NumberNode* asNumber(const Expr* root){
-    return dynamic_cast<const NumberNode*>(root);
+const LiteralNode* asLiteral(const Expr* root){
+    return dynamic_cast<const LiteralNode*>(root);
 }
 
 std::string formatNumber(double value){
@@ -21,11 +21,14 @@ std::string formatNumber(double value){
 }
 
 void traverse(const Expr* node, std::vector<std::string>& testResult){
-    const NumberNode* NN = asNumber(node);
+    const LiteralNode* LN = asLiteral(node);
     const BinaryNode* BN = asBinary(node);
 
-    if(NN != nullptr){
-        testResult.push_back(formatNumber(NN->value));
+    if(LN != nullptr){
+        if(std::holds_alternative<double>(LN->value))
+            testResult.push_back(formatNumber(std::get<double>(LN->value)));
+        else if(std::holds_alternative<std::string>(LN->value))
+            testResult.push_back(std::get<std::string>(LN->value));
         return;
     }
 

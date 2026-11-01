@@ -1,18 +1,19 @@
 #pragma once
 
+#include "Token.hpp"
+#include "Value.hpp"
 #include<memory>
 #include<utility>
-#include "Token.hpp"
 #include<vector>
 
 struct Expr{
     virtual ~Expr() = default;
 };
 
-struct NumberNode : Expr{
-    double value;
-    NumberNode(double num)
-        :value(num)
+struct LiteralNode : Expr{
+    Value value;
+    LiteralNode(Value valueFromToken)
+        :value(std::move(valueFromToken))
     {}
 };
 
@@ -78,5 +79,19 @@ struct NatraNode : Expr{
     std::vector<std::unique_ptr<Expr>> body_statements;
     NatraNode(std::vector<std::unique_ptr<Expr>> body)
         :body_statements(std::move(body))
+    {}
+};
+
+struct StringNode : Expr {
+    std::string value;
+    StringNode(std::string valueFromToken)
+        :value(valueFromToken)
+    {}
+};
+
+struct ChapaNode : Expr{
+    std::unique_ptr<Expr> expression;
+    ChapaNode(std::unique_ptr<Expr> expr)
+        :expression(std::move(expr))
     {}
 };

@@ -44,12 +44,12 @@ std::vector<Token> validExpected = {
     {"manam", 4, categoryType::MANAM},
     {"message", 4, categoryType::IDENTIFIER},
     {":=", 4, categoryType::ASSIGNMENT},
-    {"Hello \\\"World\\\"!", 4, categoryType::STRING},
+    {"Hello \"World\"!", 4, categoryType::STRING},
 
     {"manam", 5, categoryType::MANAM},
     {"path", 5, categoryType::IDENTIFIER},
     {":=", 5, categoryType::ASSIGNMENT},
-    {"C:\\\\Games\\\\new", 5, categoryType::STRING},
+    {"C:\\Games\\new", 5, categoryType::STRING},
 
     {"manam", 6, categoryType::MANAM},
     {"multiline", 6, categoryType::IDENTIFIER},

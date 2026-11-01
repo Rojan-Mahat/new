@@ -5,12 +5,14 @@
 #include "Evaluator.hpp"
 #include "ParserError.hpp"
 #include "Environment.hpp"
+#include "Value.hpp"
 
 #include <string>
 #include <vector>
 #include <memory>
 #include <iostream>
 #include <stdexcept>
+
 
 std::vector<std::string> validSources = {
     "manam a := 10;",
@@ -24,25 +26,49 @@ std::vector<std::string> validSources = {
     "manam x := 3.5; manam y := x * 2;",
     "manam a := 10; manam b := a + a; manam c := b * a;",
     "manam a := 5; a := a + 10; a := a * 2;",
-    "manam a := 10; manam b := a + 5; b := b * 2;"
+    "manam a := 10; manam b := a + 5; b := b * 2;",
+    "manam a := -15; manam b := -5; manam c := a + b;",
+    "manam a := - -5; manam b := 10 * -2;",
+    "manam a := -(5 + 3); manam b := 10 / -2;",
+    "manam name := \"Rojan\"; manam country := \"Nepal\";",
+    "manam first := \"Hello\"; manam second := \" World\"; manam full := first + second;",
+    "manam a := \"Nepal\" == \"Nepal\"; manam b := \"Nepal\" != \"India\";",
+    "manam a := -10; manam b := a < 0;",
+    "manam a := 5; yedi a > 0 { a := 20; } a;",
+    "manam a := 5; yedi a < 0 { a := 20; } natra { a := 30; } a;",
+    "manam a := 60; manam result := 0; yedi a > 100 { result := 1; } navaye a > 50 { result := 2; } natra { result := 3; } result;",
+    "manam a := 10; yedi a > 5 { yedi a == 10 { a := 50; } } a;"
 };
 
-std::vector<std::vector<double>> validExpectations = {
-    {10},
-    {20},
-    {10, 20},
-    {10, 50},
-    {10, 20, 50, 70},
-    {30},
-    {100, 25, 20},
-    {10, 20},
-    {3.5, 7},
-    {10, 20, 200},
-    {5, 15, 30},
-    {10, 15, 30}
+std::vector<std::vector<Value>> validExpectations = {
+    {10.0},
+    {20.0},
+    {10.0, 20.0},
+    {10.0, 50.0},
+    {10.0, 20.0, 50.0, 70.0},
+    {30.0},
+    {100.0, 25.0, 20.0},
+    {10.0, 20.0},
+    {3.5, 7.0},
+    {10.0, 20.0, 200.0},
+    {5.0, 15.0, 30.0},
+    {10.0, 15.0, 30.0},
+    {-15.0, -5.0, -20.0},
+    {5.0, -20.0},
+    {-8.0, -5.0},
+    {std::string("Rojan"), std::string("Nepal")},
+    {std::string("Hello"), std::string(" World"), std::string("Hello World")},
+    {1.0, 1.0},
+    {-10.0, 1.0},
+    {5.0, 0.0, 20.0},
+    {5.0, 0.0, 30.0},
+    {60.0, 0.0, 0.0, 2.0},
+    {10.0, 0.0, 50.0}
 };
 
 bool validTester(){
+    if(validSources.size() != validExpectations.size())
+        throw std::runtime_error("Valid test data size mismatch");
     for(int i = 0 ; i < validSources.size(); i++){
         std::vector<std::unique_ptr<Expr>> valid_parsed_AST;
 
@@ -53,7 +79,7 @@ bool validTester(){
         parser.parseProgram(valid_parsed_AST);
 
         Environment env;
-        std::vector<double> results;
+        std::vector<Value> results;
         for(int j = 0 ; j < valid_parsed_AST.size() ; j++)
             results.push_back(evaluate(valid_parsed_AST[j].get(),env));
         if(results != validExpectations[i]){
@@ -82,7 +108,17 @@ std::vector<std::string> invalidSources = {
     "manam a 10;",
     "manam := 10;",
     "manam a;",
-    "manam a := 10; b := a + 5;"
+    "manam a := 10; b := a + 5;",
+    "manam a := 10 + \"Nepal\";",
+    "manam a := \"Hello\" * \"World\";",
+    "manam a := \"Hello\" - \"World\";",
+    "manam a := 10; yedi \"hello\" { a := 20; }",
+    "manam a := \"hello\"; manam b := a / 2;",
+    "manam a := 10 / (5 - 5);",
+    "manam a := -;",
+    "manam a := 10; navaye a > 5 { a := 20; }",
+    "manam a := 10; natra { a := 20; }",
+    "manam a := 10; yedi a > 5 { a := 20;"
 };
 
 std::vector<std::string> invalidExpectations = {
@@ -102,7 +138,17 @@ std::vector<std::string> invalidExpectations = {
     "Expected :=",
     "Expected identifier",
     "Expected :=",
-    "Identifier not declared"
+    "Identifier not declared",
+    "Incompatible operand types",
+    "Unsupported operator with strings",
+    "Unsupported operator with strings",
+    "Condition must be numeric",
+    "Incompatible operand types",
+    "Division by zero is undefined",
+    "Expected expression, found 'SEMICOLON'",
+    "Expected expression",
+    "Expected expression",
+    "Expected }"
 };
 
 std::vector<bool> expectsParserError = {
@@ -122,7 +168,17 @@ std::vector<bool> expectsParserError = {
     true,
     true,
     true,
-    false
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
 };
 
 bool invalidTester(){
@@ -135,7 +191,7 @@ bool invalidTester(){
             parser.parseProgram(parsed_AST);
 
             Environment env;
-            std::vector<double> results;
+            std::vector<Value> results;
         
             for(int j = 0 ; j < parsed_AST.size() ; j++)
                 results.push_back(evaluate(parsed_AST[j].get(),env));

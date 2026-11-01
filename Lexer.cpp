@@ -9,7 +9,7 @@
 #include <string_view>
 
 namespace{
-    constexpr std::string_view operatorStarts = "+-*/<>=:";
+    constexpr std::string_view operatorStarts = "!+-*/<>=:";
 
     const std::unordered_map<std::string,categoryType> keywords= {
         {"manam",categoryType::MANAM},
@@ -18,6 +18,7 @@ namespace{
         {"navaye", categoryType::NAVAYE},
         {"repeat_until", categoryType::REPEAT_UNTIL},
         {"task", categoryType::TASK},
+        {"chapa", categoryType::CHAPA},
     };
 
      const std::unordered_map<std::string, categoryType> operators = {
@@ -35,6 +36,7 @@ namespace{
         {"++", categoryType::INCREMENT},
         {"--", categoryType::DECREMENT},
         {"==", categoryType::EQUAL_EQUAL},
+        {"!=", categoryType::NOT_EQUAL},
         
         {"+=", categoryType::ADDITION_ASSIGNMENT},
         {"-=", categoryType::SUBTRACTION_ASSIGNMENT},
@@ -169,11 +171,29 @@ void Lexer::handleComments(){
     cursor++;
     std::size_t start = cursor;
     int startingLine = lineNo;
+    std::string filtered_org;
     while(cursor < srcCode.size() && srcCode[cursor]!='"'){
         if(srcCode[cursor]=='\\'){
-            if(cursor+1 < srcCode.size()){
-                if(srcCode[cursor+1]=='"' || srcCode[cursor+1]=='n' || srcCode[cursor+1]=='t' || srcCode[cursor+1]=='\\')
+            cursor++;
+            if(cursor < srcCode.size()){
+                if(srcCode[cursor]=='n'){
+                    filtered_org+='\n';
                     cursor++;
+                }
+                else if(srcCode[cursor]=='"'){
+                    filtered_org+='"';
+                    cursor++;
+                }
+                else if(srcCode[cursor]=='t'){
+                    for(int i = 0; i < 4; i++){
+                        filtered_org+=' ';
+                    }
+                    cursor++;
+                }
+                else if(srcCode[cursor]=='\\'){
+                    filtered_org+='\\';
+                    cursor++;
+                }
                 else{
                     std::string org = srcCode.substr(cursor,2);
                     throw LexerError("Lexer error: unknown sequence "+ org+ " found at line ", lineNo);
@@ -182,13 +202,15 @@ void Lexer::handleComments(){
             else
                 throw LexerError("Lexer error:  Incomplete escape sequence at line ", lineNo);
         }
-        else if(srcCode[cursor] == '\n')
-            lineNo++;
-        cursor++;
+        else{
+            if(srcCode[cursor] == '\n')
+                lineNo++;
+            filtered_org+= srcCode[cursor];
+            cursor++;
+        }
     }
     if(cursor < srcCode.size()){
-        std::string org = srcCode.substr(start,cursor-start);
-        tokens.push_back(Token{org, startingLine, categoryType::STRING});
+        tokens.push_back(Token{filtered_org, startingLine, categoryType::STRING});
         cursor++;
     }
     else

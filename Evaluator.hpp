@@ -2,6 +2,7 @@
 #include "AST.hpp"
 #include "Parser.hpp"
 #include "Environment.hpp"
+#include "Value.hpp"
 
 
-double evaluate(const Expr* node , Environment& env);
+Value evaluate(const Expr* node , Environment& env);

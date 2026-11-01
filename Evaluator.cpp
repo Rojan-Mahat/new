@@ -1,24 +1,30 @@
 #include "Evaluator.hpp"
 #include "Environment.hpp"
+#include<iostream>
 
-double evaluate(const Expr* node, Environment& env){
-    const NumberNode* NN = dynamic_cast <const NumberNode*> (node);
+Value evaluate(const Expr* node, Environment& env){
+    const LiteralNode* LN = dynamic_cast <const LiteralNode*> (node);
     const BinaryNode* BN = dynamic_cast<const BinaryNode*> (node);
     const IdentifierNode* IN = dynamic_cast<const IdentifierNode*> (node);
     const AssignmentNode* AN = dynamic_cast<const AssignmentNode*> (node);
     const DeclarationNode* DN = dynamic_cast<const DeclarationNode*> (node);
     const YediNode* YN = dynamic_cast<const YediNode*> (node);
+    const ChapaNode* CN = dynamic_cast<const ChapaNode*> (node);
 
     if(YN!=nullptr){
-        double condition = evaluate(YN->conditional_statement.get(), env);
+        Value conditional = evaluate(YN->conditional_statement.get(), env);
+        if(!std::holds_alternative<double>(conditional))
+            throw std::runtime_error("Condition must be numeric");
+
+        double condition = std::get<double>(conditional);
         if(condition != 0.0){
             for(const auto& body : YN->body_statements)
                 evaluate(body.get(), env);  
         }
         else if(YN->alt.get() != nullptr)
             evaluate(YN->alt.get(), env);
-
-        return 0.0; 
+    
+        return 0.0;
     }
 
     if(const auto* NN = dynamic_cast<const NatraNode*>(node)) {
@@ -29,52 +35,80 @@ double evaluate(const Expr* node, Environment& env){
 
     if(DN != nullptr){
         const Expr* right_node = DN->initializer.get();
-        double rightValue = evaluate(right_node, env);
+        Value rightValue = evaluate(right_node, env);
         env.declareVariables(DN->name, rightValue);
         return rightValue;
     }
 
     if(AN != nullptr){
         const Expr* right_node = AN->right.get();
-        double rightValue = evaluate(right_node, env);
+        Value rightValue = evaluate(right_node, env);
         env.storeVariables(AN->name,rightValue);
         return rightValue;
     }
 
-    if(NN != nullptr)
-        return NN->value;
+    if(LN != nullptr)
+        return LN->value;
     if(IN != nullptr)
         return env.getVariables(IN->name);
+
+    if(CN != nullptr){
+        Value expr = evaluate(CN->expression.get() , env);
+        if(std::holds_alternative<std::string>(expr))
+            std::cout<<std::get<std::string>(expr);
+        else if(std::holds_alternative<double>(expr))
+            std::cout<<std::get<double>(expr);
+        return 0.0;
+    }
+
     if(BN != nullptr){
         const Expr* left_node = BN->left.get();
         const Expr* right_node = BN->right.get();
-        double leftValue = evaluate(left_node, env);
-        double rightValue = evaluate(right_node, env);
+        Value leftValue = evaluate(left_node, env);
+        Value rightValue = evaluate(right_node, env);
 
-        if(BN -> op == categoryType::EQUAL_EQUAL)
-            return leftValue == rightValue ? 1.0 : 0.0;
-        if(BN -> op == categoryType::SMALLER_THAN)
-            return leftValue < rightValue ? 1.0 : 0.0;
-        if(BN -> op == categoryType::SMALLER_OR_EQUAL_TO)
-            return leftValue <= rightValue ? 1.0 : 0.0;
-        if(BN -> op == categoryType::GREATER_THAN)
-            return leftValue > rightValue ? 1.0 : 0.0;
-        if(BN -> op == categoryType::GREATER_OR_EQUAL_TO)
-            return leftValue >= rightValue ? 1.0 : 0.0;
+        if(std::holds_alternative<double>(leftValue) && std::holds_alternative<double>(rightValue)){
+            double left = std::get<double>(leftValue);
+            double right = std::get<double>(rightValue);
+            if(BN -> op == categoryType::EQUAL_EQUAL)
+                return left == right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::NOT_EQUAL) 
+                return left != right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::SMALLER_THAN)
+                return left < right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::SMALLER_OR_EQUAL_TO)
+                return left <= right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::GREATER_THAN)
+                return left > right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::GREATER_OR_EQUAL_TO)
+                return left >= right ? 1.0 : 0.0;
 
-        if(BN -> op == categoryType::PLUS)
-            return leftValue + rightValue;
-        if(BN -> op == categoryType::MINUS)
-            return leftValue - rightValue;
-        if(BN->op == categoryType::MULTIPLY)
-            return leftValue * rightValue;
-        if(BN -> op == categoryType::DIVIDE){
-            if(rightValue == 0)
-                throw std::runtime_error("Division by zero is undefined");
-            return leftValue / rightValue;
+            if(BN -> op == categoryType::PLUS)
+                return left + right;
+            if(BN -> op == categoryType::MINUS)
+                return left - right;
+            if(BN->op == categoryType::MULTIPLY)
+                return left * right;
+            if(BN -> op == categoryType::DIVIDE){
+                if(right == 0)
+                    throw std::runtime_error("Division by zero is undefined");
+                return left / right;
+            }
+            throw  std::runtime_error("Unsupported operator");
         }
-        throw  std::runtime_error("Unsupported operator");
+        else if(std::holds_alternative<std::string>(leftValue) && std::holds_alternative<std::string>(rightValue)){
+            std::string left = std::get<std::string>(leftValue);
+            std::string right = std::get<std::string>(rightValue);
+            if(BN -> op == categoryType::PLUS)
+                return left + right;
+            if(BN -> op == categoryType::EQUAL_EQUAL) 
+                return left == right ? 1.0 : 0.0;
+            if(BN -> op == categoryType::NOT_EQUAL) 
+                return left != right ? 1.0 : 0.0;
+            throw std::runtime_error("Unsupported operator with strings");
+        }
+        throw std::runtime_error("Incompatible operand types");
     }
-    throw  std::runtime_error("Unknown or invalid AST node");
+    throw std::runtime_error("Unknown or invalid AST node");
 }
 

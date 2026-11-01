@@ -24,6 +24,8 @@ std::string tokenTypeToString(categoryType type){
             return "ASSIGNMENT";
         case categoryType::EQUAL_EQUAL:
             return "EQUAL_EQUAL";
+        case categoryType::NOT_EQUAL:
+            return "NOT_EQUAL";
         case categoryType::GREATER_THAN:
             return "GREATER_THAN";
         case categoryType::GREATER_OR_EQUAL_TO:
@@ -75,8 +77,9 @@ std::string tokenTypeToString(categoryType type){
 
         case categoryType::STRING:
             return "STRING";
+        case categoryType::CHAPA:
+            return "CHAPA";
 
         return "UNKNOWN";
     }
-    
 }

@@ -18,6 +18,7 @@ enum categoryType{
     DIVISION_ASSIGNMENT,
 
     EQUAL_EQUAL,
+    NOT_EQUAL,
     GREATER_THAN,
     GREATER_OR_EQUAL_TO,
     SMALLER_THAN,
@@ -43,6 +44,9 @@ enum categoryType{
 
 
     STRING,
+
+
+    CHAPA,
 };
 
 struct Token{

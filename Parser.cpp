@@ -1,5 +1,6 @@
 #include"Parser.hpp"
 #include "ParserError.hpp"
+#include "Value.hpp"
 #include<stdexcept>
 
 bool Parser::isBlockStatement(categoryType type){
@@ -38,7 +39,13 @@ std::unique_ptr<Expr> Parser::parsePrimary(){
 
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::NUMBER){
         double num = std::stod(tokens[cursor].original);
-        auto ptr = std::make_unique<NumberNode>(num);
+        auto ptr = std::make_unique<LiteralNode>(num);
+        cursor++;
+        return ptr;
+    }
+
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::STRING){
+        auto ptr = std::make_unique<LiteralNode>(tokens[cursor].original);
         cursor++;
         return ptr;
     }
@@ -63,17 +70,24 @@ std::unique_ptr<Expr> Parser::parsePrimary(){
 }
 
 std::unique_ptr<Expr> Parser::parseTerm(){
-    auto left = parsePrimary();
-    while(cursor < tokens.size() && 
-    (tokens[cursor].type == categoryType::MULTIPLY || 
-    tokens[cursor].type == categoryType::DIVIDE))
-    {
+    auto left = parseUnary();
+    while(cursor < tokens.size() && (tokens[cursor].type == categoryType::MULTIPLY || tokens[cursor].type == categoryType::DIVIDE)){
         categoryType op = tokens[cursor].type;
         cursor++;
-        auto right = parsePrimary();
+        auto right = parseUnary();
         left = std::make_unique<BinaryNode>(op,std::move(left),std::move(right));
     }
     return left;
+}
+
+std::unique_ptr<Expr> Parser::parseUnary(){
+    if(cursor >= tokens.size() || tokens[cursor].type != categoryType::MINUS)
+        return parsePrimary();
+    cursor++;
+    auto innerUnary = parseUnary();
+    return std::make_unique<BinaryNode>(categoryType::MINUS, 
+            std::make_unique<LiteralNode>(0.0),
+            std::move(innerUnary));
 }
 
 std::unique_ptr<Expr> Parser::parseExpression(){
@@ -90,6 +104,8 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 }
 
 std::unique_ptr<Expr> Parser::parseStatement(){
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::CHAPA)
+        return parseChapa();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::YEDI)
         return parseYedi();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::MANAM)
@@ -180,6 +196,7 @@ std::unique_ptr<Expr> Parser::parseComparison(){
     auto left = parseExpression();
     while(cursor < tokens.size() && (tokens[cursor].type == categoryType::EQUAL_EQUAL
     || tokens[cursor].type == categoryType::GREATER_THAN
+    || tokens[cursor].type == categoryType::NOT_EQUAL
     || tokens[cursor].type == categoryType::GREATER_OR_EQUAL_TO
     || tokens[cursor].type == categoryType::SMALLER_THAN
     || tokens[cursor].type == categoryType::SMALLER_OR_EQUAL_TO)){
@@ -191,5 +208,9 @@ std::unique_ptr<Expr> Parser::parseComparison(){
     return left;
 }
 
-
+std::unique_ptr<Expr> Parser::parseChapa(){
+    cursor++;
+    auto expr = parseComparison();
+    return std::make_unique<ChapaNode>(std::move(expr));
+}
 
