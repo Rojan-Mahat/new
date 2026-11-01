@@ -1,6 +1,77 @@
 manam a := 10;
-yedi a > 100 {
-    a := 999;
+manam b := 20;
+manam c := 0;
+manam score := 0;
+
+yedi a < b {
+    score := score + 10;
+
+    yedi a + b == 30 {
+        score := score + 20;
+
+        yedi a > 100 {
+            score := 9999;
+        }
+        navaye b == 20 {
+            score := score + 30;
+
+            yedi (score > 50) == 1 {
+                score := score * 2;
+            }
+            natra {
+                score := 999;
+            }
+        }
+        natra {
+            score := 999;
+        }
+    }
+    natra {
+        score := 888;
+    }
+
+    c := score + a * b / 10;
+}
+natra {
+    score := 777;
+}
+
+yedi c > 100 {
+    score := score + 100;
+}
+navaye c == 100 {
+    score := score + 200;
+}
+navaye c > 50 {
+    score := score + 300;
+
+    yedi score > 400 {
+        b := b + 5;
+    }
+}
+natra {
+    score := 0;
+}
+
+yedi a == 10 {
+    a := a + 5;
+}
+
+yedi b > 20 {
+    b := b * 2;
+}
+
+yedi a > b {
+    score := 9999;
+}
+navaye a == 15 {
+    score := score + b;
+}
+natra {
+    score := 1111;
 }
 
 a;
+b;
+c;
+score;

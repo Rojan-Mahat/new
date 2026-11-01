@@ -59,9 +59,24 @@ struct DeclarationNode : Expr {
 struct YediNode : Expr{
     std::unique_ptr<Expr> conditional_statement;
     std::vector<std::unique_ptr<Expr>> body_statements;
+    std::unique_ptr<Expr> alt;
 
     YediNode(std::unique_ptr<Expr> condition,std::vector<std::unique_ptr<Expr>> body)
         :conditional_statement(std::move(condition)),
-        body_statements(std::move(body))
+        body_statements(std::move(body)),
+        alt(nullptr)
+    {}
+
+    YediNode(std::unique_ptr<Expr> condition,std::vector<std::unique_ptr<Expr>> body, std::unique_ptr<Expr> alternative)
+        :conditional_statement(std::move(condition)),
+        body_statements(std::move(body)),
+        alt(std::move(alternative))
+    {}
+};
+
+struct NatraNode : Expr{
+    std::vector<std::unique_ptr<Expr>> body_statements;
+    NatraNode(std::vector<std::unique_ptr<Expr>> body)
+        :body_statements(std::move(body))
     {}
 };

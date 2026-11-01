@@ -10,13 +10,20 @@ double evaluate(const Expr* node, Environment& env){
     const YediNode* YN = dynamic_cast<const YediNode*> (node);
 
     if(YN!=nullptr){
-        const Expr* conditional = YN->conditional_statement.get();
-        double condition = evaluate(conditional, env);
+        double condition = evaluate(YN->conditional_statement.get(), env);
         if(condition != 0.0){
-            for(const auto& body : YN->body_statements){
-                evaluate(body.get(), env);
-            }
+            for(const auto& body : YN->body_statements)
+                evaluate(body.get(), env);  
         }
+        else if(YN->alt.get() != nullptr)
+            evaluate(YN->alt.get(), env);
+
+        return 0.0; 
+    }
+
+    if(const auto* NN = dynamic_cast<const NatraNode*>(node)) {
+        for (const auto& body : NN->body_statements)
+            evaluate(body.get(), env);
         return 0.0;
     }
 

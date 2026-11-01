@@ -99,8 +99,17 @@ std::unique_ptr<Expr> Parser::parseStatement(){
 
 
 std::unique_ptr<Expr> Parser::parseYedi(){
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+
+    categoryType currentType = tokens[cursor].type;
+    if(currentType != categoryType::YEDI && currentType != categoryType::NAVAYE && currentType != categoryType::NATRA)
+        throw ParserError("Error: Unexpected statement, Expected conditional", tokens[cursor].line);
+        
     cursor++;
-    auto conditions = parseComparison();
+    std::unique_ptr<Expr> conditions;
+    if(currentType != categoryType::NATRA)
+        conditions = parseComparison();
     if(cursor >= tokens.size())
         throw ParserError("Error: Statement closed unexpectedly, Expected {", tokens.empty() ? 1 : tokens.back().line);
     if(tokens[cursor].type != categoryType::LEFT_BRACE)
@@ -118,8 +127,16 @@ std::unique_ptr<Expr> Parser::parseYedi(){
         throw ParserError("Error: Unexpected statement, Expected }", tokens[cursor].line);
 
     cursor++;
-    auto ptr = std::make_unique<YediNode>(std::move(conditions), std::move(body));
-    return ptr;
+    if(currentType == categoryType::NATRA){
+        return std::make_unique<NatraNode>(std::move(body));
+    }
+
+    if(cursor < tokens.size() && (tokens[cursor].type == categoryType::NAVAYE || tokens[cursor].type == categoryType::NATRA)){
+        auto innerPtr = parseYedi();
+        return std::make_unique<YediNode> (std::move(conditions),std::move(body),std::move(innerPtr));
+    }
+    else
+        return std::make_unique<YediNode>(std::move(conditions), std::move(body));
 }
 
 
