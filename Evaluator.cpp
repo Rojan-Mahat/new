@@ -10,6 +10,32 @@ Value evaluate(const Expr* node, Environment& env){
     const DeclarationNode* DN = dynamic_cast<const DeclarationNode*> (node);
     const YediNode* YN = dynamic_cast<const YediNode*> (node);
     const ChapaNode* CN = dynamic_cast<const ChapaNode*> (node);
+    const JabasammaNode* JN = dynamic_cast<const JabasammaNode*> (node);
+    const KaamNode* KN = dynamic_cast<const KaamNode*> (node);
+
+    if(KN != nullptr){
+        FunctionValue function{KN, &env};
+        env.declareVariables(KN->name, function);
+        return 0.0;
+    }
+    
+    if(JN != nullptr){
+        Value conditional = evaluate(JN->conditional_statement.get(), env);
+        if(!std::holds_alternative<double>(conditional))
+            throw std::runtime_error("Condition must be numeric");
+        double condition = std::get<double>(conditional);
+        while(condition != 0.0){
+            Environment child(&env);
+            for(const auto& body : JN->body_statements)
+                evaluate(body.get(), child); 
+
+            conditional = evaluate(JN->conditional_statement.get(), env);
+            if(!std::holds_alternative<double>(conditional))
+                throw std::runtime_error("Condition must be numeric");
+            condition = std::get<double>(conditional);
+        }
+        return 0.0;
+    }
 
     if(YN!=nullptr){
         Value conditional = evaluate(YN->conditional_statement.get(), env);
@@ -18,8 +44,9 @@ Value evaluate(const Expr* node, Environment& env){
 
         double condition = std::get<double>(conditional);
         if(condition != 0.0){
+            Environment child(&env);
             for(const auto& body : YN->body_statements)
-                evaluate(body.get(), env);  
+                evaluate(body.get(), child);  
         }
         else if(YN->alt.get() != nullptr)
             evaluate(YN->alt.get(), env);
@@ -28,8 +55,9 @@ Value evaluate(const Expr* node, Environment& env){
     }
 
     if(const auto* NN = dynamic_cast<const NatraNode*>(node)) {
+        Environment child(&env);
         for (const auto& body : NN->body_statements)
-            evaluate(body.get(), env);
+            evaluate(body.get(), child);
         return 0.0;
     }
 

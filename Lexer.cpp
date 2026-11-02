@@ -16,8 +16,9 @@ namespace{
         {"yedi", categoryType::YEDI},
         {"natra", categoryType::NATRA},
         {"navaye", categoryType::NAVAYE},
-        {"repeat_until", categoryType::REPEAT_UNTIL},
-        {"task", categoryType::TASK},
+        {"jabasamma", categoryType::JABASAMMA},
+        {"kaam", categoryType::KAAM},
+        {"firta", categoryType::FIRTA},
         {"chapa", categoryType::CHAPA},
     };
 

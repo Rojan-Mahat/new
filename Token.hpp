@@ -39,8 +39,9 @@ enum categoryType{
     YEDI,
     NAVAYE,
     NATRA,
-    REPEAT_UNTIL,
-    TASK,
+    JABASAMMA,
+    KAAM,
+    FIRTA,
 
 
     STRING,

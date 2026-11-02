@@ -2,8 +2,14 @@
 #include <stdexcept>
 
 void Environment::storeVariables(std::string name, Value data){
-    if(!ifExists(name))
-        throw std::runtime_error("Identifier not declared");
+    if(!ifExists(name)){
+        if(ifParentExists()){
+            parent->storeVariables(name,data);
+            return;
+        }
+        else
+            throw std::runtime_error("Identifier not declared");
+    }
     variables[name] = std::move(data);
 }
 
@@ -18,10 +24,17 @@ bool Environment::ifExists(std::string name){
     return it != variables.end();
 }
 
-Value Environment::getVariables(std::string name){
-    auto it = variables.find(name);
-    if(it != variables.end()){
-        return it->second;
-    }
-    throw std::runtime_error("Identifier not accessible");
+bool Environment::ifParentExists(){
+    return parent != nullptr;
 }
+
+Value Environment::getVariables(std::string name){
+    auto currentMap = variables.find(name);
+    if(currentMap != variables.end()){
+        return currentMap->second;
+    }
+    if(ifParentExists())
+        return parent->getVariables(name);
+    throw std::runtime_error("Unknown identifer found");
+}
+

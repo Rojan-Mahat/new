@@ -70,10 +70,12 @@ std::string tokenTypeToString(categoryType type){
             return "NAVAYE";
         case categoryType::NATRA:
             return "NATRA";
-        case categoryType::REPEAT_UNTIL:
-            return "REPEAT_UNTIL";
-        case categoryType::TASK:
-            return "TASK";
+        case categoryType::JABASAMMA:
+            return "JABASAMMA";
+        case categoryType::KAAM:
+            return "KAAM";
+        case categoryType::FIRTA:
+            return "FIRTA";
 
         case categoryType::STRING:
             return "STRING";

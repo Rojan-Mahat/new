@@ -12,6 +12,8 @@ struct Parser{
         std::size_t cursor;
         std::unique_ptr<Expr> parseStatement();
 
+        std::unique_ptr<Expr> parseKaam();//parseComparision
+        std::unique_ptr<Expr> parseJabasamma();//parseComparision
         std::unique_ptr<Expr> parseChapa();//parseComparision
         std::unique_ptr<Expr> parseDeclaration();//parseComparision
         std::unique_ptr<Expr> parseYedi();

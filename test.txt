@@ -1,16 +1,5 @@
-manam temperature := -15;
-manam adjustment := - -5;
-manam result := temperature + adjustment;
-
-yedi result < 0 {
-    chapa "Below zero: ";
-    chapa result;
-    chapa "\n";
-}
-natra {
-    chapa "Nonnegative\n";
+kaam greet(name) {
+    chapa name;
 }
 
-chapa "Absolute magnitude: ";
-chapa -result;
-chapa "\n";
+chapa "Function registered!";

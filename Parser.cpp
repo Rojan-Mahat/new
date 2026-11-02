@@ -4,7 +4,7 @@
 #include<stdexcept>
 
 bool Parser::isBlockStatement(categoryType type){
-    return type == categoryType::YEDI;
+    return type == categoryType::YEDI || type == categoryType::JABASAMMA ||type == categoryType::KAAM;
 }
 
 void Parser::parseProgram(std::vector<std::unique_ptr<Expr>>& vec){
@@ -104,6 +104,10 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 }
 
 std::unique_ptr<Expr> Parser::parseStatement(){
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::KAAM)
+        return parseKaam();
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::JABASAMMA)
+        return parseJabasamma();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::CHAPA)
         return parseChapa();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::YEDI)
@@ -111,6 +115,75 @@ std::unique_ptr<Expr> Parser::parseStatement(){
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::MANAM)
         return parseDeclaration();
     return parseAssignment();
+}
+
+std::unique_ptr<Expr> Parser::parseKaam(){
+    cursor++;
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::IDENTIFIER)
+        throw ParserError("Error: Unexpected statement, Expected function name", tokens[cursor].line);
+    
+    std::string functionName = tokens[cursor].original;
+    cursor++;
+
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_PAREN)
+        throw ParserError("Error: Unexpected statement, Expected (", tokens[cursor].line);
+    
+    cursor++;
+    std::vector<std::string> parameters;
+    while(cursor < tokens.size() && tokens[cursor].type != categoryType::RIGHT_PAREN){
+        if(tokens[cursor].type == categoryType::IDENTIFIER)
+            parameters.push_back(tokens[cursor].original);
+        else if(tokens[cursor].type != categoryType::COMMA)
+            throw ParserError("Invalid parameter", tokens[cursor].line);
+        cursor++;
+    }
+    
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+
+    cursor++;
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_BRACE)
+        throw ParserError("Error: Unexpected statement, Expected {", tokens[cursor].line);
+
+    cursor++;
+    std::vector<std::unique_ptr<Expr>> body;
+    while(cursor < tokens.size() && tokens[cursor].type != categoryType::RIGHT_BRACE){
+        body.push_back(parse());
+    }
+
+    if(cursor >= tokens.size())
+        throw ParserError("Error: Statement closed unexpectedly, Expected }", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::RIGHT_BRACE)
+        throw ParserError("Error: Unexpected statement, Expected }", tokens[cursor].line);
+    
+    cursor++;
+    return std::make_unique<KaamNode>(std::move(functionName), std::move(parameters), std::move(body)); 
+}
+
+std::unique_ptr<Expr> Parser::parseJabasamma(){
+    cursor++;
+    auto comparisions = parseComparison();
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_BRACE)
+        throw ParserError("Error: Unexpected statement, Expected {", tokens[cursor].line);
+    cursor++;
+    std::vector<std::unique_ptr<Expr>> body;
+    while(cursor < tokens.size() && tokens[cursor].type != categoryType::RIGHT_BRACE){
+        body.push_back(parse());
+    }
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly, Expected }", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::RIGHT_BRACE)
+        throw ParserError("Error: Expected }", tokens[cursor].line);
+    cursor++;
+    return std::make_unique<JabasammaNode>(std::move(comparisions), std::move(body));
 }
 
 
