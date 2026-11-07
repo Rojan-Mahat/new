@@ -1,5 +1,11 @@
-kaam greet(name) {
-    chapa name;
+manam a:= 5;
+yedi a < 3{
+    chapa "a thulo cha";
+}
+navaye a == 5 {
+    chapa "a 5 ho";
+}
+natra{
+    a := 0;
 }
 
-chapa "Function registered!";

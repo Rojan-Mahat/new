@@ -31,6 +31,9 @@ std::unique_ptr<Expr> Parser::parse(){
 }
 
 std::unique_ptr<Expr> Parser::parsePrimary(){
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::KAAMGAR)
+        return parseKaamGar();
+    
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::IDENTIFIER){
         auto ptr = std::make_unique<IdentifierNode>(tokens[cursor].original);
         cursor++;
@@ -164,6 +167,58 @@ std::unique_ptr<Expr> Parser::parseKaam(){
     
     cursor++;
     return std::make_unique<KaamNode>(std::move(functionName), std::move(parameters), std::move(body)); 
+}
+
+std::unique_ptr<Expr> Parser::parseKaamGar(){
+    cursor++;
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_PAREN)
+        throw ParserError("Error: Unexpected statement, Expected (", tokens[cursor].line);
+    
+    cursor++;
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::IDENTIFIER)
+        throw ParserError("Error: Unexpected statement, Expected function call", tokens[cursor].line);
+
+    std::unique_ptr<Expr> function = parsePrimary();
+
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::LEFT_PAREN)
+        throw ParserError("Error: Unexpected statement, Expected (", tokens[cursor].line);
+    
+    cursor++;
+    std::vector<std::unique_ptr<Expr>> arguments;
+    while(cursor < tokens.size() && tokens[cursor].type != categoryType::RIGHT_PAREN){
+        arguments.push_back(parseComparison());
+        if(cursor >= tokens.size())
+            throw ParserError("Expected comma or )", tokens.back().line);
+
+        if(tokens[cursor].type == categoryType::COMMA){
+            cursor++;
+            if (cursor >= tokens.size() || tokens[cursor].type == categoryType::RIGHT_PAREN)
+                throw ParserError("Expected argument after comma", tokens[cursor - 1].line);
+        }
+
+        else if (tokens[cursor].type != categoryType::RIGHT_PAREN) 
+            throw ParserError("Expected comma or )", tokens[cursor].line);
+        
+    }
+
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    
+    cursor++;
+
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type != categoryType::RIGHT_PAREN)
+        throw ParserError("Error: Unexpected statement, Expected )", tokens[cursor].line);
+    
+    cursor++;
+    return std::make_unique<KaamGarNode>(std::move(function), std::move(arguments));
 }
 
 std::unique_ptr<Expr> Parser::parseJabasamma(){

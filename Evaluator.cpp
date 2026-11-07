@@ -12,13 +12,34 @@ Value evaluate(const Expr* node, Environment& env){
     const ChapaNode* CN = dynamic_cast<const ChapaNode*> (node);
     const JabasammaNode* JN = dynamic_cast<const JabasammaNode*> (node);
     const KaamNode* KN = dynamic_cast<const KaamNode*> (node);
+    const KaamGarNode* KGN = dynamic_cast<const KaamGarNode*> (node);
+
+    if(KGN != nullptr){
+        Value functionValue = evaluate(KGN->function.get(), env);
+        if(!std::holds_alternative<FunctionValue>(functionValue))
+            throw std::runtime_error("Attempted to call a non-function");
+        FunctionValue function = std::get<FunctionValue>(functionValue);
+        const KaamNode* KM = function.definition;
+        Environment functionEnv(function.definedEnv);
+        std::vector<std::string> parm = KM->parameters;
+        //for(std::unique_ptr<Expr>& args : KGN->arguments){
+            //Value value = evaluate(args, env);
+            //functionEnv.declareVariables(function.definition->parameters, evaluate(std::move(args),env));
+        
+
+
+
+
+        
+        
+    }
 
     if(KN != nullptr){
         FunctionValue function{KN, &env};
         env.declareVariables(KN->name, function);
         return 0.0;
     }
-    
+
     if(JN != nullptr){
         Value conditional = evaluate(JN->conditional_statement.get(), env);
         if(!std::holds_alternative<double>(conditional))
@@ -77,6 +98,7 @@ Value evaluate(const Expr* node, Environment& env){
 
     if(LN != nullptr)
         return LN->value;
+        
     if(IN != nullptr)
         return env.getVariables(IN->name);
 

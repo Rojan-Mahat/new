@@ -42,6 +42,7 @@ enum categoryType{
     JABASAMMA,
     KAAM,
     FIRTA,
+    KAAMGAR,
 
 
     STRING,

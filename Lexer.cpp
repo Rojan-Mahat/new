@@ -18,8 +18,10 @@ namespace{
         {"navaye", categoryType::NAVAYE},
         {"jabasamma", categoryType::JABASAMMA},
         {"kaam", categoryType::KAAM},
+        {"kaam_gar", categoryType::KAAMGAR},
         {"firta", categoryType::FIRTA},
         {"chapa", categoryType::CHAPA},
+
     };
 
      const std::unordered_map<std::string, categoryType> operators = {

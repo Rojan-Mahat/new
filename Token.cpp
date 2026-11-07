@@ -74,6 +74,9 @@ std::string tokenTypeToString(categoryType type){
             return "JABASAMMA";
         case categoryType::KAAM:
             return "KAAM";
+        case categoryType::KAAMGAR:
+            return "KAAMGAR";
+
         case categoryType::FIRTA:
             return "FIRTA";
 

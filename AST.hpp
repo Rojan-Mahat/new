@@ -120,11 +120,11 @@ struct KaamNode : Expr{
     {}
 };
 
-struct CallNode : Expr{
+struct KaamGarNode : Expr{
     std::unique_ptr<Expr> function;
     std::vector<std::unique_ptr<Expr>> arguments;
 
-    CallNode(std::unique_ptr<Expr> name,std::vector<std::unique_ptr<Expr>> args)
+    KaamGarNode(std::unique_ptr<Expr> name,std::vector<std::unique_ptr<Expr>> args)
         :function(std::move(name)),
         arguments(std::move(args))
     {}
