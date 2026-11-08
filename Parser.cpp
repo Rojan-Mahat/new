@@ -107,6 +107,8 @@ std::unique_ptr<Expr> Parser::parseExpression(){
 }
 
 std::unique_ptr<Expr> Parser::parseStatement(){
+    if(cursor < tokens.size() && tokens[cursor].type == categoryType::FIRTA)
+        return parseFirta();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::KAAM)
         return parseKaam();
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::JABASAMMA)
@@ -118,6 +120,16 @@ std::unique_ptr<Expr> Parser::parseStatement(){
     if(cursor < tokens.size() && tokens[cursor].type == categoryType::MANAM)
         return parseDeclaration();
     return parseAssignment();
+}
+
+std::unique_ptr<Expr> Parser::parseFirta(){
+    cursor++;
+    if(cursor >= tokens.size()) 
+        throw ParserError("Error: Statement closed unexpectedly", tokens.empty() ? 1 : tokens.back().line);
+    if(tokens[cursor].type == categoryType::SEMICOLON)
+        return std::make_unique<FirtaNode>(); 
+    
+    return std::make_unique<FirtaNode>(parseComparison()); 
 }
 
 std::unique_ptr<Expr> Parser::parseKaam(){

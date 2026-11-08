@@ -36,5 +36,5 @@ Value Environment::getVariables(std::string name){
     if(ifParentExists())
         return parent->getVariables(name);
     throw std::runtime_error("Unknown identifer found");
-}
+} 
 

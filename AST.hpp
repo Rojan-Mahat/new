@@ -129,3 +129,11 @@ struct KaamGarNode : Expr{
         arguments(std::move(args))
     {}
 };
+
+struct FirtaNode : Expr{
+    std::unique_ptr<Expr> value;
+
+    FirtaNode(std::unique_ptr<Expr> expr = nullptr)
+        :value(std::move(expr))
+    {}
+};

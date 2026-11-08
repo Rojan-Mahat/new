@@ -1,5 +1,6 @@
 #include "Evaluator.hpp"
 #include "Environment.hpp"
+#include "ReturnSignal.hpp"
 #include<iostream>
 
 Value evaluate(const Expr* node, Environment& env){
@@ -13,6 +14,8 @@ Value evaluate(const Expr* node, Environment& env){
     const JabasammaNode* JN = dynamic_cast<const JabasammaNode*> (node);
     const KaamNode* KN = dynamic_cast<const KaamNode*> (node);
     const KaamGarNode* KGN = dynamic_cast<const KaamGarNode*> (node);
+    const FirtaNode* FN = dynamic_cast<const FirtaNode*> (node);
+
 
     if(KGN != nullptr){
         Value functionValue = evaluate(KGN->function.get(), env);
@@ -21,17 +24,30 @@ Value evaluate(const Expr* node, Environment& env){
         FunctionValue function = std::get<FunctionValue>(functionValue);
         const KaamNode* KM = function.definition;
         Environment functionEnv(function.definedEnv);
-        std::vector<std::string> parm = KM->parameters;
-        //for(std::unique_ptr<Expr>& args : KGN->arguments){
-            //Value value = evaluate(args, env);
-            //functionEnv.declareVariables(function.definition->parameters, evaluate(std::move(args),env));
+        if(KGN->arguments.size() != KM->parameters.size())
+            throw std::runtime_error("Parameters and arguments must match");
+        for(int i = 0 ; i <  KGN->arguments.size(); i++){
+            Value value =  evaluate(KGN->arguments[i].get(), env);
+            functionEnv.declareVariables(KM->parameters[i], value);
+        }
+
+        try{
+            for (const auto& body : KM->body_statements)
+                evaluate(body.get(), functionEnv);
+        }
+        catch (const ReturnSignal& signal) {
+            return signal.value;
+        }
+
+        return 0.0;
         
+    }
 
-
-
-
-        
-        
+    if (FN != nullptr) {
+        Value result = 0.0;
+        if (FN->value != nullptr)
+            result = evaluate(FN->value.get(), env);
+        throw ReturnSignal{result};
     }
 
     if(KN != nullptr){

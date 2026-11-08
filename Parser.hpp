@@ -20,6 +20,7 @@ struct Parser{
         //parseComparision[condition], parse()[each body], parseYedi[navaye/natra]
         std::unique_ptr<Expr> parseAssignment();
         //parseComparison(),parseExpression(),parseTerm(),parseUnary(),parsePrimary()
+        std::unique_ptr<Expr> parseFirta();
 
         std::unique_ptr<Expr> parseComparison();
         std::unique_ptr<Expr> parseExpression();

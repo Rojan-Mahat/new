@@ -80,7 +80,7 @@ std::vector<Token> validExpected = {
     {"natra", 14, categoryType::NATRA},
     {"{", 14, categoryType::LEFT_BRACE},
 
-    {"task", 15, categoryType::TASK},
+    {"task", 15, categoryType::KAAM},
     {"calculate", 15, categoryType::IDENTIFIER},
     {"(", 15, categoryType::LEFT_PAREN},
     {"a", 15, categoryType::IDENTIFIER},
@@ -101,7 +101,7 @@ std::vector<Token> validExpected = {
     {"}", 17, categoryType::RIGHT_BRACE},
     {"}", 18, categoryType::RIGHT_BRACE},
 
-    {"repeat_until", 19, categoryType::REPEAT_UNTIL},
+    {"repeat_until", 19, categoryType::JABASAMMA},
     {"(", 19, categoryType::LEFT_PAREN},
     {"player_123", 19, categoryType::IDENTIFIER},
     {"==", 19, categoryType::EQUAL_EQUAL},
@@ -120,7 +120,7 @@ std::vector<Token> validExpected = {
     {",", 21, categoryType::COMMA},
     {"natra", 21, categoryType::NATRA},
     {",", 21, categoryType::COMMA},
-    {"task", 21, categoryType::TASK},
+    {"task", 21, categoryType::KAAM},
     {"]", 21, categoryType::RIGHT_SQUARE},
     {";", 21, categoryType::SEMICOLON}
 };

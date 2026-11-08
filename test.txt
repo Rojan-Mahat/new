@@ -1,11 +1,15 @@
-manam a:= 5;
-yedi a < 3{
-    chapa "a thulo cha";
-}
-navaye a == 5 {
-    chapa "a 5 ho";
-}
-natra{
-    a := 0;
+kaam find() {
+    manam i := 0;
+
+    jabasamma i < 10 {
+        yedi i == 4 {
+            firta i;
+        }
+
+        i := i+ 1;
+    }
+
+    firta 99;
 }
 
+chapa kaam_gar(find());
