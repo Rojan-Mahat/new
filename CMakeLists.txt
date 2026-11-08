@@ -51,3 +51,8 @@ add_executable(interpreter_tests
 target_include_directories(interpreter_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+enable_testing()
+add_test(NAME lexer COMMAND lexer_tests)
+add_test(NAME parser COMMAND parser_tests)
+add_test(NAME environment COMMAND environment_tests)
+add_test(NAME interpreter COMMAND interpreter_tests)
