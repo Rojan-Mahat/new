@@ -1,165 +1,61 @@
-#include "Token.hpp"
 #include "Lexer.hpp"
 #include "LexerError.hpp"
+#include <iostream>
+#include <vector>
+#include <string>
 
-#include<vector>
-#include<iostream>
-
-std::string validSource =
-    "~ LEXER STRESS TEST\n"
-    "manam player_123 := 99.75\n"
-    "manam _health := 100\n"
-    "manam message := \"Hello \\\"World\\\"!\"\n"
-    "manam path := \"C:\\\\Games\\\\new\"\n"
-    "manam multiline := \"First line\n"
-    "Second ~ not a comment\n"
-    "Third line\"\n"
-    "yedi (_health >= 50) {\n"
-    "    player_123 += 10\n"
-    "    _health--\n"
-    "    player_123 *= 2.5\n"
-    "}\n"
-    "natra {\n"
-    "    task calculate(a, b) {\n"
-    "        manam result := a + b / 2\n"
-    "    }\n"
-    "}\n"
-    "repeat_until (player_123 == 0)\n"
-    "maker+++_abc\n"
-    "[manam, yedi, natra, task];\n"
-    "~ END";
-
-
-std::vector<Token> validExpected = {
-    {"manam", 2, categoryType::MANAM},
-    {"player_123", 2, categoryType::IDENTIFIER},
-    {":=", 2, categoryType::ASSIGNMENT},
-    {"99.75", 2, categoryType::NUMBER},
-
-    {"manam", 3, categoryType::MANAM},
-    {"_health", 3, categoryType::IDENTIFIER},
-    {":=", 3, categoryType::ASSIGNMENT},
-    {"100", 3, categoryType::NUMBER},
-
-    {"manam", 4, categoryType::MANAM},
-    {"message", 4, categoryType::IDENTIFIER},
-    {":=", 4, categoryType::ASSIGNMENT},
-    {"Hello \"World\"!", 4, categoryType::STRING},
-
-    {"manam", 5, categoryType::MANAM},
-    {"path", 5, categoryType::IDENTIFIER},
-    {":=", 5, categoryType::ASSIGNMENT},
-    {"C:\\Games\\new", 5, categoryType::STRING},
-
-    {"manam", 6, categoryType::MANAM},
-    {"multiline", 6, categoryType::IDENTIFIER},
-    {":=", 6, categoryType::ASSIGNMENT},
-    {"First line\nSecond ~ not a comment\nThird line", 6, categoryType::STRING},
-
-    {"yedi", 9, categoryType::YEDI},
-    {"(", 9, categoryType::LEFT_PAREN},
-    {"_health", 9, categoryType::IDENTIFIER},
-    {">=", 9, categoryType::GREATER_OR_EQUAL_TO},
-    {"50", 9, categoryType::NUMBER},
-    {")", 9, categoryType::RIGHT_PAREN},
-    {"{", 9, categoryType::LEFT_BRACE},
-
-    {"player_123", 10, categoryType::IDENTIFIER},
-    {"+=", 10, categoryType::ADDITION_ASSIGNMENT},
-    {"10", 10, categoryType::NUMBER},
-
-    {"_health", 11, categoryType::IDENTIFIER},
-    {"--", 11, categoryType::DECREMENT},
-
-    {"player_123", 12, categoryType::IDENTIFIER},
-    {"*=", 12, categoryType::MULTIPLICATION_ASSIGNMENT},
-    {"2.5", 12, categoryType::NUMBER},
-
-    {"}", 13, categoryType::RIGHT_BRACE},
-
-    {"natra", 14, categoryType::NATRA},
-    {"{", 14, categoryType::LEFT_BRACE},
-
-    {"task", 15, categoryType::KAAM},
-    {"calculate", 15, categoryType::IDENTIFIER},
-    {"(", 15, categoryType::LEFT_PAREN},
-    {"a", 15, categoryType::IDENTIFIER},
-    {",", 15, categoryType::COMMA},
-    {"b", 15, categoryType::IDENTIFIER},
-    {")", 15, categoryType::RIGHT_PAREN},
-    {"{", 15, categoryType::LEFT_BRACE},
-
-    {"manam", 16, categoryType::MANAM},
-    {"result", 16, categoryType::IDENTIFIER},
-    {":=", 16, categoryType::ASSIGNMENT},
-    {"a", 16, categoryType::IDENTIFIER},
-    {"+", 16, categoryType::PLUS},
-    {"b", 16, categoryType::IDENTIFIER},
-    {"/", 16, categoryType::DIVIDE},
-    {"2", 16, categoryType::NUMBER},
-
-    {"}", 17, categoryType::RIGHT_BRACE},
-    {"}", 18, categoryType::RIGHT_BRACE},
-
-    {"repeat_until", 19, categoryType::JABASAMMA},
-    {"(", 19, categoryType::LEFT_PAREN},
-    {"player_123", 19, categoryType::IDENTIFIER},
-    {"==", 19, categoryType::EQUAL_EQUAL},
-    {"0", 19, categoryType::NUMBER},
-    {")", 19, categoryType::RIGHT_PAREN},
-
-    {"maker", 20, categoryType::IDENTIFIER},
-    {"++", 20, categoryType::INCREMENT},
-    {"+", 20, categoryType::PLUS},
-    {"_abc", 20, categoryType::IDENTIFIER},
-
-    {"[", 21, categoryType::LEFT_SQUARE},
-    {"manam", 21, categoryType::MANAM},
-    {",", 21, categoryType::COMMA},
-    {"yedi", 21, categoryType::YEDI},
-    {",", 21, categoryType::COMMA},
-    {"natra", 21, categoryType::NATRA},
-    {",", 21, categoryType::COMMA},
-    {"task", 21, categoryType::KAAM},
-    {"]", 21, categoryType::RIGHT_SQUARE},
-    {";", 21, categoryType::SEMICOLON}
-};
-
-std::string invalidSource =
-    "manam health := 100\n"
-    "manam message := \"Safe ~ text\"\n"
-    "~ An ignored comment\n"
-    "yedi (health >= 50) {\n"
-    "    manam value := 12.5\n"
-    "    health += 10\n"
-    "    manam broken := 123_abc\n"
-    "    manam neverReached := 500\n"
-    "}\n";
-int expectedLine = 7;
-
-
-bool tester(const std::string& source , const std::vector<Token>& expected){
-    Lexer lexer(source);
-    std::vector<Token> actual = lexer.tokenize();
-    return (actual == expected);
-}
-
-bool errorTester(const std::string& source,int expectedLine){
-    Lexer lexer(source);
-    try{
-        std::vector<Token> actual = lexer.tokenize();
-        return false;
+struct Case { const char* name; std::string source; std::vector<Token> tokens; };
+int main() {
+    const std::vector<Case> valid = {
+        {"keywords", "manam yedi navaye natra jabasamma kaam kaam_gar firta chapa",
+            {{"manam",1,MANAM},{"yedi",1,YEDI},{"navaye",1,NAVAYE},{"natra",1,NATRA},{"jabasamma",1,JABASAMMA},{"kaam",1,KAAM},{"kaam_gar",1,KAAMGAR},{"firta",1,FIRTA},{"chapa",1,CHAPA}}},
+        {"identifiers", "_name12 abc kaam_extra firta2", {{"_name12",1,IDENTIFIER},{"abc",1,IDENTIFIER},{"kaam_extra",1,IDENTIFIER},{"firta2",1,IDENTIFIER}}},
+        {"numbers", "0 15 3.75", {{"0",1,NUMBER},{"15",1,NUMBER},{"3.75",1,NUMBER}}},
+        {"operators", ":= + - * / == != < <= > >= ++ -- += -= *= /=",
+            {{":=",1,ASSIGNMENT},{"+",1,PLUS},{"-",1,MINUS},{"*",1,MULTIPLY},{"/",1,DIVIDE},{"==",1,EQUAL_EQUAL},{"!=",1,NOT_EQUAL},{"<",1,SMALLER_THAN},{"<=",1,SMALLER_OR_EQUAL_TO},{">",1,GREATER_THAN},{">=",1,GREATER_OR_EQUAL_TO},{"++",1,INCREMENT},{"--",1,DECREMENT},{"+=",1,ADDITION_ASSIGNMENT},{"-=",1,SUBTRACTION_ASSIGNMENT},{"*=",1,MULTIPLICATION_ASSIGNMENT},{"/=",1,DIVISION_ASSIGNMENT}}},
+        {"punctuation", "(){},;[]", {{"(",1,LEFT_PAREN},{")",1,RIGHT_PAREN},{"{",1,LEFT_BRACE},{"}",1,RIGHT_BRACE},{",",1,COMMA},{";",1,SEMICOLON},{"[",1,LEFT_SQUARE},{"]",1,RIGHT_SQUARE}}},
+        {"comments and line numbers", "manam x := 1; ~ ignored\nchapa x;\nfirta;", {{"manam",1,MANAM},{"x",1,IDENTIFIER},{":=",1,ASSIGNMENT},{"1",1,NUMBER},{";",1,SEMICOLON},{"chapa",2,CHAPA},{"x",2,IDENTIFIER},{";",2,SEMICOLON},{"firta",3,FIRTA},{";",3,SEMICOLON}}},
+        {"string escapes", R"src("a\n\"b\"\\c" "a\tb")src", {{std::string("a\n\"b\"\\c"),1,STRING},{"a    b",1,STRING}}},
+        {"multiline string", "\"first\nsecond\" chapa", {{"first\nsecond",1,STRING},{"chapa",2,CHAPA}}},
+        {"empty input", "", {}},
+        {"comment only", "~ no tokens", {}}
+    };
+    struct Bad { const char* name; std::string source; int line; };
+    const std::vector<Bad> invalid = {
+        {"letters after number","123abc",1},
+        {"two decimal points","1.2.3",1},
+        {"leading decimal",".5",1},
+        {"trailing decimal","5.",1},
+        {"unknown symbol","manam x := 1;\n@",2},
+        {"invalid operator",":",1},
+        {"unterminated string","\"hello",1},
+        {"unknown escape",R"src("a\q")src",1},
+        {"unfinished escape",std::string("\"hi") + '\\',1}
+    };
+    int failed=0,total=0;
+    for(const auto& tc:valid) {
+        ++total;
+        try {
+            Lexer lexer(tc.source);
+            auto got=lexer.tokenize();
+            if(got!=tc.tokens) {
+                ++failed;
+                std::cerr<<"FAIL "<<tc.name<<" expected "<<tc.tokens.size()<<" tokens, got "<<got.size()<<"\n";
+                for(size_t i=0;i<got.size();++i)
+                    if(i>=tc.tokens.size() || !(got[i]==tc.tokens[i]))
+                        std::cerr<<"  mismatched token "<<i<<": "<<got[i].original<<" line "<<got[i].line<<"\n";
+            } else std::cout<<"PASS "<<tc.name<<"\n";
+        } catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<": "<<e.what()<<"\n";}
     }
-    catch(const LexerError& e){
-        return e.getLine() == expectedLine;
+    for(const auto& tc:invalid) {
+        ++total;
+        try { Lexer lexer(tc.source); lexer.tokenize(); ++failed; std::cerr<<"FAIL "<<tc.name<<" did not throw\n"; }
+        catch(const LexerError& e) {
+            if(e.getLine()!=tc.line) {++failed;std::cerr<<"FAIL "<<tc.name<<" wrong line "<<e.getLine()<<"\n";}
+            else std::cout<<"PASS "<<tc.name<<"\n";
+        }
+        catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<" wrong error: "<<e.what()<<"\n";}
     }
-}
-
-int main(){ 
-    bool validPassed = tester(validSource, validExpected);
-    bool errorPassed = errorTester(invalidSource, 7);
-    bool allPassed = validPassed && errorPassed;
-    std::cout << (allPassed ? "ALL TESTS PASSED\n"
-                           : "SOME TESTS FAILED\n");
-    return allPassed ? 0 : 1;
+    std::cout<<"Lexer "<<total-failed<<"/"<<total<<" passed\n";
+    return failed?1:0;
 }
