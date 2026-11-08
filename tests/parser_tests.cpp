@@ -1,194 +1,142 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "ParserError.hpp"
-#include "Value.hpp"
-#include<iostream>
-#include <sstream>
+#include "AST.hpp"
+#include <iostream>
+#include <functional>
+#include <vector>
+#include <string>
 
-const BinaryNode* asBinary(const Expr* root) {
-    return dynamic_cast<const BinaryNode*>(root);
+using Program = std::vector<std::unique_ptr<Expr>>;
+
+Program parse(const std::string& source) {
+    Lexer lexer(source);
+    Parser parser(lexer.tokenize());
+    Program program;
+    parser.parseProgram(program);
+    return program;
 }
-
-const LiteralNode* asLiteral(const Expr* root){
-    return dynamic_cast<const LiteralNode*>(root);
+template<class T> const T* as(const Expr* node) {
+    return dynamic_cast<const T*>(node);
 }
-
-std::string formatNumber(double value){
-    std::ostringstream stream;
-    stream << value;           
-    std::string result = stream.str(); 
-    return result;
+bool number(const Expr* expr,double expected) {
+    auto p=as<LiteralNode>(expr);
+    return p && std::holds_alternative<double>(p->value)
+        && std::get<double>(p->value)==expected;
 }
-
-void traverse(const Expr* node, std::vector<std::string>& testResult){
-    const LiteralNode* LN = asLiteral(node);
-    const BinaryNode* BN = asBinary(node);
-
-    if(LN != nullptr){
-        if(std::holds_alternative<double>(LN->value))
-            testResult.push_back(formatNumber(std::get<double>(LN->value)));
-        else if(std::holds_alternative<std::string>(LN->value))
-            testResult.push_back(std::get<std::string>(LN->value));
-        return;
-    }
-
-    if(BN != nullptr){
-        testResult.push_back(tokenTypeToString(BN->op));
-        const Expr* left_node = BN->left.get();
-        const Expr* right_node = BN->right.get();
-        traverse(left_node, testResult);
-        traverse(right_node, testResult);
-    }
+bool identifier(const Expr* expr,const std::string& name) {
+    auto p=as<IdentifierNode>(expr);
+    return p && p->name==name;
 }
-
-std::vector<bool> tester(const std::vector<std::string>& sources , const  std::vector<std::vector<std::string>> & expectations){
-    if(sources.size()!=expectations.size())
-        return {};
-    
-    std::vector<bool> returningResults;
-    for(size_t i = 0 ; i < sources.size(); i++){
-        Lexer lexer(sources[i]);
-        auto tokens = lexer.tokenize();
-
-        Parser parser(tokens);
-        auto root = parser.parse(); 
-
-        std::vector<std::string> testResult;
-        traverse(root.get(), testResult);
-        
-        returningResults.push_back((testResult == expectations[i]) ? 1 : 0);
-    }
-    return returningResults;
+bool binary(const Expr* expr,categoryType op) {
+    auto p=as<BinaryNode>(expr);
+    return p && p->op==op;
 }
-
-std::vector<bool> errorTestor(const std::vector<std::string>& invalidSources, 
-    const std::vector<std::string>& errorExpectations,
-    const std::vector<int>& expectedLines){
-    if(invalidSources.size() != errorExpectations.size())
-        return {};
-    if(invalidSources.size() != expectedLines.size())
-        return {};
-    std::vector<bool> returningResults;
-    for(size_t i = 0 ; i < invalidSources.size(); i++){
-        try{
-            Lexer lexer(invalidSources[i]);
-            auto tokens = lexer.tokenize();
-            Parser parser(tokens);
-            auto root = parser.parse(); 
-            returningResults.push_back(false);
-        }
-
-        catch(const ParserError& e){
-            std::string message = e.what();
-            int line = e.getLine();
-            bool passed = message.find(errorExpectations[i]) != std::string::npos && line == expectedLines[i];
-            returningResults.push_back(passed);
-        }
-
-        catch (const std::exception& e){
-            returningResults.push_back(false);
-        }
-    }
-    return returningResults;
-}
-
-int getValidResult( std::vector<std::string> sources, std::vector<std::vector<std::string>> expectations){
-    bool failed = false;
-    std::vector<bool> finalResults = tester(sources, expectations);
-    if(finalResults.empty()){
-        std::cout<<"Sources and Expectations do not match! ";
-        return 1;
-    }
-    for(size_t i = 0 ; i < finalResults.size(); i++){
-        if(!finalResults[i]){
-            std::cout<<"Failed the tests at index "<<i << ". Failed Statement below :- \n";
-            std::cout<<sources[i]<<" \n \n";
-            failed = true;
-        }    
-    }
-    if(!failed){
-        std::cout<<"ALL VALID TESTS PASSED! ";
-        return 0;
-    }
-    std::cout<<"SOME VALID TESTS FAILED ";
-    return 1;
-}
-
-int getErrorResult(std::vector<std::string> invalidSources , std::vector<std::string> errorExpectations, std::vector<int> expectedLines){
-    bool failed = false;
-    std::vector<bool> finalResults = errorTestor(invalidSources, errorExpectations , expectedLines);
-    if(finalResults.empty()){
-        std::cout<<"Sources and Expectations do not match! ";
-        return 1;
-    }
-    for(size_t i = 0 ; i < finalResults.size(); i++){
-        if(!finalResults[i]){
-            std::cout<<"Failed the tests at index "<<i << ". Failed Statement below :- \n";
-            std::cout<<invalidSources[i]<<" \n \n";
-            failed = true;
-        }    
-    }
-    if(!failed){
-        std::cout<<"ALL ERROR TESTS PASSED! ";
-        return 0;
-    }
-    std::cout<<"SOME ERROR TESTS FAILED ";
-    return 1;
-}
-
-
-int main(){
-    std::vector<std::string> sources = {
-        "3.75 + 2.5 * 4;",
-        "0.125 * 8.5;",
-        "(12.5 - 3.25) / 2.5;",
-        "1.0 + 2.00 * 3.500;",
-        "((0.5 + 1.25) * (4.75 - 2.5)) / 3.0;"
-    };
-    std::vector<std::vector<std::string>> expectations = {
-        {"PLUS", "3.75", "MULTIPLY", "2.5", "4"},
-        {"MULTIPLY", "0.125", "8.5"},
-        {"DIVIDE", "MINUS", "12.5", "3.25", "2.5"},
-        {"PLUS", "1", "MULTIPLY", "2", "3.5"},
-        {"DIVIDE", "MULTIPLY", "PLUS", "0.5", "1.25",
-        "MINUS", "4.75", "2.5", "3"}
+struct Case {
+    const char* name;
+    std::string source;
+    std::function<bool(const Program&)> check;
+};
+int main() {
+    const std::vector<Case> valid = {
+        {"precedence","1 + 2 * 3;",[](const Program& p){
+            if(p.size()!=1) return false;
+            auto plus=as<BinaryNode>(p[0].get());
+            return plus && plus->op==PLUS && number(plus->left.get(),1)
+                && binary(plus->right.get(),MULTIPLY);
+        }},
+        {"parentheses","(1 + 2) * 3;",[](const Program& p){
+            auto mul=p.size()==1?as<BinaryNode>(p[0].get()):nullptr;
+            return mul && mul->op==MULTIPLY && binary(mul->left.get(),PLUS) && number(mul->right.get(),3);
+        }},
+        {"unary minus","-5;",[](const Program& p){
+            auto minus=p.size()==1?as<BinaryNode>(p[0].get()):nullptr;
+            return minus && minus->op==MINUS && number(minus->left.get(),0) && number(minus->right.get(),5);
+        }},
+        {"declaration","manam total := 2 + 3;",[](const Program& p){
+            auto d=p.size()==1?as<DeclarationNode>(p[0].get()):nullptr;
+            return d && d->name=="total" && binary(d->initializer.get(),PLUS);
+        }},
+        {"assignment","total := 9;",[](const Program& p){
+            auto a=p.size()==1?as<AssignmentNode>(p[0].get()):nullptr;
+            return a && a->name=="total" && number(a->right.get(),9);
+        }},
+        {"conditional branches","yedi x > 0 { chapa x; } navaye x == 0 { chapa 0; } natra { chapa -1; }",[](const Program& p){
+            auto y=p.size()==1?as<YediNode>(p[0].get()):nullptr;
+            auto other=y?as<YediNode>(y->alt.get()):nullptr;
+            return y && binary(y->conditional_statement.get(),GREATER_THAN)
+                && y->body_statements.size()==1 && as<ChapaNode>(y->body_statements[0].get())
+                && other && binary(other->conditional_statement.get(),EQUAL_EQUAL)
+                && as<NatraNode>(other->alt.get());
+        }},
+        {"while","jabasamma x < 5 { x := x + 1; }",[](const Program& p){
+            auto w=p.size()==1?as<JabasammaNode>(p[0].get()):nullptr;
+            return w && binary(w->conditional_statement.get(),SMALLER_THAN)
+                && w->body_statements.size()==1 && as<AssignmentNode>(w->body_statements[0].get());
+        }},
+        {"function and return","kaam add(a,b) { firta a + b; }",[](const Program& p){
+            auto k=p.size()==1?as<KaamNode>(p[0].get()):nullptr;
+            if(!k || k->name!="add" || k->parameters!=std::vector<std::string>{"a","b"} || k->body_statements.size()!=1) return false;
+            auto r=as<FirtaNode>(k->body_statements[0].get());
+            return r && binary(r->value.get(),PLUS);
+        }},
+        {"bare return","firta;",[](const Program& p){
+            auto r=p.size()==1?as<FirtaNode>(p[0].get()):nullptr;
+            return r && !r->value;
+        }},
+        {"function call arguments","kaam_gar(add(10, 20 + x));",[](const Program& p){
+            auto call=p.size()==1?as<KaamGarNode>(p[0].get()):nullptr;
+            return call && identifier(call->function.get(),"add") && call->arguments.size()==2
+                && number(call->arguments[0].get(),10) && binary(call->arguments[1].get(),PLUS);
+        }},
+        {"nested call","kaam_gar(add(kaam_gar(one()), 2));",[](const Program& p){
+            auto outer=p.size()==1?as<KaamGarNode>(p[0].get()):nullptr;
+            return outer && outer->arguments.size()==2 && as<KaamGarNode>(outer->arguments[0].get());
+        }},
+        {"empty function","kaam noop() { }",[](const Program& p){
+            auto k=p.size()==1?as<KaamNode>(p[0].get()):nullptr;
+            return k && k->parameters.empty() && k->body_statements.empty();
+        }},
+        {"multiple statements","manam x := 2; x := 3; chapa x;",[](const Program& p){
+            return p.size()==3 && as<DeclarationNode>(p[0].get())
+                && as<AssignmentNode>(p[1].get()) && as<ChapaNode>(p[2].get());
+        }}
     };
 
-    std::vector<std::string> invalidSources = {
-        "2 + * 3;",
-        "3+",
-        "(2 + 3",
-        "(2--3)",
-        "2 ++ 3",
-        "2 3",
-        "((2 + 3) * 4",
-        "2 + (3 * / 4)",
-        "()",
-        ""
+    struct Bad {const char* name; std::string source;};
+    const std::vector<Bad> invalid = {
+        {"missing semicolon","manam x := 2"},
+        {"missing expression","manam x := ;"},
+        {"bad declaration name","manam 5 := 2;"},
+        {"unclosed parenthesis","(1+2;"},
+        {"missing function name","kaam (a) { firta a; }"},
+        {"missing function brace","kaam add(a) firta a;"},
+        {"unclosed function body","kaam add(a) { firta a;"},
+        {"unclosed while","jabasamma x > 0 { x := 0;"},
+        {"unclosed conditional","yedi x { chapa x;"},
+        {"invalid call comma","kaam_gar(f(1 2));"},
+        {"trailing call comma","kaam_gar(f(1,));"},
+        {"missing call closing parenthesis","kaam_gar(f(1);"},
+        {"incomplete return","firta 1 + ;"}
     };
-    std::vector<std::string> errorExpectations = {
-        "Expected expression, found 'MULTIPLY'",
-        "Expected expression, reached end of input",
-        "Parenthesis not closed",
-        "Unexpected Token'DECREMENT'",
-        "Expected semicolon after expression",
-        "Expected semicolon after expression",
-        "Parenthesis not closed",
-        "Expected expression, found 'DIVIDE'",
-        "Expected expression, found 'RIGHT_PAREN'",
-        "Expected expression, reached end of input"
-    };
-    std::vector<int> expectedLines = {
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-    };
-
-    int validStatus = getValidResult(sources, expectations);
-    std::cout << '\n';
-
-    int errorStatus = getErrorResult(invalidSources,errorExpectations,expectedLines);
-    std::cout << '\n';
-
-    return (validStatus == 0 && errorStatus == 0) ? 0 : 1;
+    int failed=0,total=0;
+    for(const auto& tc:valid) {
+        ++total;
+        try {
+            auto program=parse(tc.source);
+            if(!tc.check(program)) {++failed;std::cerr<<"FAIL "<<tc.name<<" AST mismatch\n";}
+            else std::cout<<"PASS "<<tc.name<<"\n";
+        } catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<": "<<e.what()<<"\n";}
+    }
+    for(const auto& tc:invalid) {
+        ++total;
+        try {
+            auto program=parse(tc.source);
+            ++failed;
+            std::cerr<<"FAIL "<<tc.name<<" unexpectedly parsed\n";
+        } catch(const ParserError&) {std::cout<<"PASS "<<tc.name<<"\n";}
+        catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<" wrong exception: "<<e.what()<<"\n";}
+    }
+    std::cout<<"Parser "<<total-failed<<"/"<<total<<" passed\n";
+    return failed?1:0;
 }
-
-
