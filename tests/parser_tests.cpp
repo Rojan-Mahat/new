@@ -103,7 +103,11 @@ int main() {
         }}
     };
 
-    struct Bad {const char* name; std::string source;};
+    struct Bad {
+        const char* name; 
+        std::string source;
+    };
+
     const std::vector<Bad> invalid = {
         {"missing semicolon","manam x := 2"},
         {"missing expression","manam x := ;"},
@@ -122,11 +126,18 @@ int main() {
     int failed=0,total=0;
     for(const auto& tc:valid) {
         ++total;
-        try {
+        try{
             auto program=parse(tc.source);
-            if(!tc.check(program)) {++failed;std::cerr<<"FAIL "<<tc.name<<" AST mismatch\n";}
-            else std::cout<<"PASS "<<tc.name<<"\n";
-        } catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<": "<<e.what()<<"\n";}
+            if(!tc.check(program)){
+                ++failed;
+                std::cerr<<"FAIL "<<tc.name<<" AST mismatch\n";}
+            else
+                std::cout<<"PASS "<<tc.name<<"\n";
+        } 
+        catch(const std::exception& e){
+            ++failed;
+            std::cerr<<"FAIL "<<tc.name<<": "<<e.what()<<"\n";
+        }
     }
     for(const auto& tc:invalid) {
         ++total;
@@ -134,8 +145,14 @@ int main() {
             auto program=parse(tc.source);
             ++failed;
             std::cerr<<"FAIL "<<tc.name<<" unexpectedly parsed\n";
-        } catch(const ParserError&) {std::cout<<"PASS "<<tc.name<<"\n";}
-        catch(const std::exception& e) {++failed;std::cerr<<"FAIL "<<tc.name<<" wrong exception: "<<e.what()<<"\n";}
+        } 
+        catch(const ParserError&){
+            std::cout<<"PASS "<<tc.name<<"\n";
+        }
+        catch(const std::exception& e){
+            ++failed;
+            std::cerr<<"FAIL "<<tc.name<<" wrong exception: "<<e.what()<<"\n";
+        }
     }
     std::cout<<"Parser "<<total-failed<<"/"<<total<<" passed\n";
     return failed?1:0;

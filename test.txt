@@ -1,15 +1,45 @@
-kaam find() {
-    manam i := 0;
 
-    jabasamma i < 10 {
-        yedi i == 4 {
-            firta i;
-        }
+~ Goru Bank - demo program written in new
 
-        i := i+ 1;
-    }
 
-    firta 99;
+chapa("========================= \n");
+chapa("       NAYA BANK      \n");
+chapa("=========================\n");
+
+
+kaam deposit(balance, amount) {
+    firta balance + amount;
 }
 
-chapa kaam_gar(find());
+kaam withdraw(balance, amount) {
+    yedi amount > balance {
+        chapa "Withdrawal denied!\n";
+        firta balance;
+    }
+
+    firta balance - amount;
+}
+
+kaam interest(balance, rate, years) {
+    manam i := 0;
+
+    jabasamma i < years {
+        balance := balance + balance * rate / 100;
+        i := i + 1;
+    }
+
+    firta balance;
+}
+
+
+manam balance := 1000;
+chapa "Initial balance: $";
+chapa balance;
+
+balance := kaam_gar(deposit(balance, 500));
+balance := kaam_gar(withdraw(balance, 300));
+balance := kaam_gar(interest(balance, 5, 3));
+
+chapa "\nFinal balance: $";
+chapa balance;
+chapa "\n=====================\n";
